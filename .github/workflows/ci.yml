@@ -94,10 +94,12 @@ jobs:
         run: |
           VERSION="${{ needs.plugin.outputs.version }}"
           TAG="v${VERSION}"
+          ASSET="helixlang-ide/helixlang-ide-${VERSION}.zip"
+          ls -la "$ASSET"
           # Re-push with the same version: drop the previous release + tag first
           # (gh release create has no --force).
           gh release delete "$TAG" --yes --cleanup-tag 2>/dev/null || true
-          gh release create "$TAG" helixlang-ide/*.zip \
+          gh release create "$TAG" "$ASSET" \
             --repo "${{ github.repository }}" \
             --title "HelixLang-IDE ${VERSION}" \
             --generate-notes \
