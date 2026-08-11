@@ -14,6 +14,7 @@ navigation, semantic highlighting, inlay hints, a bytecode disassembler, and a l
 [Requirements](#-requirements) ·
 [Build from source](#-build-from-source) ·
 [CI & Releases](#-ci--releases) ·
+[Contributing](#-contributing) ·
 [Documentation](#-documentation)
 
 ![CI](https://github.com/SeanHank/HelixLang-LSP-Plugin/actions/workflows/ci.yml/badge.svg)
@@ -153,6 +154,22 @@ The full engineering design lives in [`doc/`](./doc/README.md):
 | [07](./doc/07-roadmap.md) | Milestones, acceptance criteria, risks |
 
 ---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please read **[CONTRIBUTING.md](CONTRIBUTING.md)** first — it covers
+the development setup, the quality gates (`ruff` + `mypy` + pytest ≥85% coverage for the
+server; `./gradlew build` with JDK 17 for the plugin), the golden-test workflow, coding
+conventions, and the documentation policy.
+
+In short: fork the repo, create a branch off `main`, and open a pull request.
+
+```bash
+git clone https://github.com/SeanHank/HelixLang-LSP-Plugin.git
+cd HelixLang-LSP-Plugin
+python -m pip install -e "server[dev]"
+JAVA_HOME=/path/to/jdk-17 ./gradlew build
+```
 
 ## License
 
