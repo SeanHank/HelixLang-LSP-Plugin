@@ -2,7 +2,7 @@
 
 # 🧬 HelixLang IDE
 
-_Writing DNA. Debugging it like code._
+_"The precise sequence of the bases is the code which carries the genetical information. — James Watson & Francis Crick_
 
 **Language Server Protocol integration for the HelixLang DSL — a PyCharm client plus a Python language server.**
 
