@@ -34,14 +34,10 @@ navigation, semantic highlighting, inlay hints, a bytecode disassembler, and a l
 pip install helixlang-lsp
 ```
 
-> `helixlang-lsp` is published on **[PyPI](https://pypi.org/project/helixlang-lsp/)** and pulls
-> in the `helixlang` compiler/VM as a dependency.
-
 4. Point the plugin at that interpreter in **Settings → HelixLang**.
 
 Open any `.helix` file — the server starts automatically and the IDE comes alive.
 
-> 🔧 The plugin is also available on the **[JetBrains Marketplace](https://plugins.jetbrains.com/plugin/33479)**.  
 > Prefer installing a specific version manually? Grab the zip from the
 > **[GitHub Releases](https://github.com/SeanHank/HelixLang-LSP-Plugin/releases)** page and use
 > **Settings → Plugins → ⚙ → Install Plugin from Disk…**.
