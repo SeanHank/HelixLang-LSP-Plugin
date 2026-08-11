@@ -94,9 +94,11 @@ jobs:
         run: |
           VERSION="${{ needs.plugin.outputs.version }}"
           TAG="v${VERSION}"
+          # Re-push with the same version: drop the previous release + tag first
+          # (gh release create has no --force).
+          gh release delete "$TAG" --yes --cleanup-tag 2>/dev/null || true
           gh release create "$TAG" helixlang-ide/*.zip \
             --repo "${{ github.repository }}" \
             --title "HelixLang-IDE ${VERSION}" \
             --generate-notes \
-            --latest \
-            --force
+            --latest
