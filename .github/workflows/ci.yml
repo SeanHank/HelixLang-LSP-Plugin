@@ -94,7 +94,9 @@ jobs:
         run: |
           VERSION="${{ needs.plugin.outputs.version }}"
           TAG="v${VERSION}"
-          ASSET="helixlang-ide/helixlang-ide-${VERSION}.zip"
+          # download-artifact@v4 extracts a single named artifact directly to
+          # $GITHUB_WORKSPACE (no artifact-name subdirectory).
+          ASSET="helixlang-ide-${VERSION}.zip"
           ls -la "$ASSET"
           # Re-push with the same version: drop the previous release + tag first
           # (gh release create has no --force).
