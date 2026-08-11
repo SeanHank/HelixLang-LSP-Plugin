@@ -31,8 +31,11 @@ navigation, semantic highlighting, inlay hints, a bytecode disassembler, and a l
 4. Install the language server (once, per Python interpreter):
 
 ```bash
-pip install "helixlang[lsp]"
+pip install helixlang-lsp
 ```
+
+> `helixlang-lsp` is published on **[PyPI](https://pypi.org/project/helixlang-lsp/)** and pulls
+> in the `helixlang` compiler/VM as a dependency. 
 
 5. Point the plugin at that interpreter in **Settings → HelixLang**.
 
@@ -67,7 +70,7 @@ Open any `.helix` file — the server starts automatically and the IDE comes ali
 |---|---|
 | IDE | **PyCharm 2022.2+** (Community or Professional) |
 | JDK (to build) | 17 |
-| Python | 3.11+ with `helixlang[lsp]` installed |
+| Python | 3.11+ with `helixlang-lsp` installed (from [PyPI](https://pypi.org/project/helixlang-lsp/)) |
 
 The language, compiler and VM themselves live in the sibling repository
 [`SeanHank/HelixLang`](https://github.com/SeanHank/HelixLang).
