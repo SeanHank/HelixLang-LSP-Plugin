@@ -18,6 +18,7 @@ navigation, semantic highlighting, inlay hints, a bytecode disassembler, and a l
 [Documentation](#-documentation)
 
 ![CI](https://github.com/SeanHank/HelixLang-LSP-Plugin/actions/workflows/ci.yml/badge.svg)
+[![Marketplace Downloads](https://img.shields.io/jetbrains/plugin/d/33479.svg)](https://plugins.jetbrains.com/plugin/33479)
 
 </div>
 
@@ -25,21 +26,25 @@ navigation, semantic highlighting, inlay hints, a bytecode disassembler, and a l
 
 ## 🚀 Quick Start
 
-1. Grab the latest plugin zip from the **[Releases](https://github.com/SeanHank/HelixLang-LSP-Plugin/releases)** page.
-2. In PyCharm open **Settings → Plugins → ⚙ → Install Plugin from Disk…** and pick the zip.
-3. **Restart PyCharm**.
-4. Install the language server (once, per Python interpreter):
+1. In PyCharm open **Settings → Plugins → Marketplace**, search for **HelixLang**, and click **Install**.
+2. **Restart PyCharm**.
+3. Install the language server (once, per Python interpreter):
 
 ```bash
 pip install helixlang-lsp
 ```
 
 > `helixlang-lsp` is published on **[PyPI](https://pypi.org/project/helixlang-lsp/)** and pulls
-> in the `helixlang` compiler/VM as a dependency. 
+> in the `helixlang` compiler/VM as a dependency.
 
-5. Point the plugin at that interpreter in **Settings → HelixLang**.
+4. Point the plugin at that interpreter in **Settings → HelixLang**.
 
 Open any `.helix` file — the server starts automatically and the IDE comes alive.
+
+> 🔧 The plugin is also available on the **[JetBrains Marketplace](https://plugins.jetbrains.com/plugin/33479)**.  
+> Prefer installing a specific version manually? Grab the zip from the
+> **[GitHub Releases](https://github.com/SeanHank/HelixLang-LSP-Plugin/releases)** page and use
+> **Settings → Plugins → ⚙ → Install Plugin from Disk…**.
 
 > 💡 New releases ship automatically: every push to `main` builds the plugin and publishes a
 > GitHub Release tagged `v<version>`. Bump the version in
@@ -139,6 +144,9 @@ push/PR, then **publishes a GitHub Release on every push to `main`**:
 
 **Versioning** is a one-line change: edit `pluginVersion=` in
 [`gradle.properties`](gradle.properties), push, and CI publishes the new release for you.
+
+Releases are mirrored to the **[JetBrains Marketplace](https://plugins.jetbrains.com/plugin/33479)**,
+where the plugin installs directly from the IDE's **Settings → Plugins → Marketplace**.
 
 ---
 
