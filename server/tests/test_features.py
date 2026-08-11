@@ -1,0 +1,239 @@
+"""Unit tests for the pure feature functions."""
+
+from __future__ import annotations
+
+from helixlang_lsp.analysis import analyze
+from helixlang_lsp.features import (
+    code_actions as ca,
+)
+from helixlang_lsp.features import (
+    completion as comp,
+)
+from helixlang_lsp.features import (
+    definitions as defs,
+)
+from helixlang_lsp.features import (
+    document_symbols as ds,
+)
+from helixlang_lsp.features import (
+    folding as folding,
+)
+from helixlang_lsp.features import (
+    formatting as fmt,
+)
+from helixlang_lsp.features import (
+    hover as hover,
+)
+from helixlang_lsp.features import (
+    inlay_hints as ih,
+)
+from helixlang_lsp.features import (
+    references as refs,
+)
+from helixlang_lsp.features import (
+    semantic_tokens as st,
+)
+
+SAMPLE = (
+    "#config table=standard\n"
+    "#promoter name=p_lac strength=0.8\n"
+    "#gene name=lacZ promoter=p_lac\n"
+    "ATG GCT GGT TAA\n"
+    "#end\n"
+    "#regulate p_lac -> lacZ\n"
+)
+
+
+def _ana():
+    return analyze(SAMPLE, uri="file:///t.helix")
+
+
+def test_hover_codon():
+    result = hover.hover(SAMPLE, _ana(), {"position": {"line": 3, "character": 4}})
+    assert result is not None
+    body = result["contents"]["value"]
+    assert "OP_BUILD_PROTEIN" in body
+    assert "Ala" in body
+
+
+def test_hover_gene_name():
+    result = hover.hover(SAMPLE, _ana(), {"position": {"line": 2, "character": 11}})
+    assert result is not None
+    assert "lacZ" in result["contents"]["value"]
+
+
+def test_hover_promoter_name():
+    result = hover.hover(SAMPLE, _ana(), {"position": {"line": 2, "character": 30}})
+    assert result is not None
+    assert "p_lac" in result["contents"]["value"]
+
+
+def test_hover_annotation_kind():
+    result = hover.hover(SAMPLE, _ana(), {"position": {"line": 2, "character": 1}})
+    assert result is not None
+    assert "**#gene**" in result["contents"]["value"]
+
+
+def test_hover_outside_anywhere_returns_none():
+    result = hover.hover(SAMPLE, _ana(), {"position": {"line": 0, "character": 0}})
+    assert result is not None  # #config annotation docs
+
+
+def test_completion_after_hash():
+    # standalone '#' line -> all annotation kinds
+    text = SAMPLE + "#\n"
+    ana = analyze(text)
+    result = comp.completions(text, ana, {"position": {"line": 6, "character": 1}})
+    labels = [i["label"] for i in result["items"]]
+    assert "gene" in labels and "promoter" in labels
+
+
+def test_completion_field_names():
+    # cursor inside #gene field region
+    result = comp.completions(SAMPLE, _ana(),
+                              {"position": {"line": 2, "character": 8}})
+    labels = [i["label"] for i in result["items"]]
+    assert "name" in labels and "promoter" in labels and "call_target" in labels
+
+
+def test_completion_field_enum_value():
+    result = comp.completions(SAMPLE, _ana(),
+                              {"position": {"line": 0, "character": 20}})
+    labels = [i["label"] for i in result["items"]]
+    assert "standard" in labels and "ciliate" in labels
+
+
+def test_completion_promoter_symbols():
+    # cursor on 'promoter=' value in a #gene header -> defined promoters
+    result = comp.completions(SAMPLE, _ana(),
+                              {"position": {"line": 2, "character": 30}})
+    labels = [i["label"] for i in result["items"]]
+    assert "p_lac" in labels
+
+
+def test_completion_codons_in_body():
+    result = comp.completions(SAMPLE, _ana(),
+                              {"position": {"line": 3, "character": 5}})
+    labels = [i["label"] for i in result["items"]]
+    assert "ATG" in labels and "TAA" in labels
+
+
+def test_definition_promoter_reference():
+    result = defs.definitions(SAMPLE, _ana(),
+                              {"position": {"line": 2, "character": 30}})
+    assert result is not None
+    loc = result[0]
+    assert loc["uri"] == "file:///t.helix"
+    assert loc["range"]["start"]["line"] == 1
+
+
+def test_definition_gene_name():
+    result = defs.definitions(SAMPLE, _ana(),
+                              {"position": {"line": 6, "character": 22}})
+    assert result is not None
+    assert result[0]["range"]["start"]["line"] == 2
+
+
+def test_references_include_declaration():
+    result = refs.references(SAMPLE, _ana(), {
+        "position": {"line": 2, "character": 11},
+        "context": {"includeDeclaration": True},
+    })
+    assert len(result) >= 2
+
+
+def test_references_exclude_declaration():
+    result = refs.references(SAMPLE, _ana(), {
+        "position": {"line": 2, "character": 11},
+        "context": {"includeDeclaration": False},
+    })
+    decl_lines = [r["range"]["start"]["line"] for r in result]
+    assert 2 not in decl_lines
+
+
+def test_document_symbols():
+    result = ds.document_symbols(SAMPLE, _ana(), {})
+    kinds = {s["name"]: s["kind"] for s in result}
+    assert kinds["lacZ"] == 12  # function
+    assert kinds["p_lac"] == 13  # variable
+    assert kinds["p_lac -> lacZ"] == 25  # operator
+
+
+def test_folding_ranges():
+    result = folding.folding_ranges(SAMPLE, _ana(), {})
+    assert result and result[0]["kind"] == "region"
+
+
+def test_semantic_tokens_encode():
+    result = st.semantic_tokens(SAMPLE, _ana(), {})
+    data = result["data"]
+    assert len(data) % 5 == 0
+    assert len(data) > 0
+
+
+def test_semantic_tokens_start_modifier():
+    result = st.semantic_tokens(SAMPLE, _ana(), {})
+    data = result["data"]
+    token_types = [data[i + 3] for i in range(0, len(data), 5)]
+    assert 0 in token_types  # keyword (OP_START)
+
+
+def test_formatting_groups_codons():
+    messy = "#gene name=g\nATG  GCT\tGGT TAA\n#end\n"
+    ana = analyze(messy)
+    edits = fmt.formatting(messy, ana, {"options": {"insertSpaces": True, "tabSize": 4}})
+    assert len(edits) == 1
+    assert edits[0]["newText"] == "#gene name=g\nATG GCT GGT TAA\n#end\n"
+
+
+def test_formatting_noop():
+    ana = analyze(SAMPLE)
+    assert fmt.formatting(SAMPLE, ana, {}) == []
+
+
+def test_inlay_hints_for_gene_body():
+    result = ih.inlay_hints(SAMPLE, _ana(), {})
+    hints = [h for h in result if h["data"]["kind"] == "codon"]
+    assert len(hints) == 4  # ATG GCT GGT TAA
+    assert hints[0]["data"]["opcode"] == "OP_START"
+    assert hints[0]["position"]["character"] == 3
+
+
+def test_code_action_unterminated_orf():
+    text = "#gene name=g\nATG GCT\n"
+    ana = analyze(text)
+    parse = [d for d in ana.diagnostics if d.code == "parse"]
+    assert parse
+    ctx = {"context": {"diagnostics": [d.to_dict() for d in parse]}}
+    result = ca.code_actions(text, ana, ctx)
+    titles = [a["title"] for a in result]
+    assert any("TAA" in t for t in titles)
+
+
+def test_code_action_dna_length():
+    text = "#gene name=g\nATG GGGG TAA\n#end\n"
+    ana = analyze(text)
+    lex = [d for d in ana.diagnostics if d.code == "lex"]
+    ctx = {"context": {"diagnostics": [d.to_dict() for d in lex]}}
+    result = ca.code_actions(text, ana, ctx)
+    assert any("multiple of 3" in a["title"] for a in result)
+
+
+def test_code_action_missing_name():
+    text = "#promoter\n#end\n"
+    ana = analyze(text)
+    parse = [d for d in ana.diagnostics if d.code == "parse"]
+    ctx = {"context": {"diagnostics": [d.to_dict() for d in parse]}}
+    result = ca.code_actions(text, ana, ctx)
+    assert any("name=" in a["title"] for a in result)
+
+
+def test_workspace_edit_json_shape():
+    text = "#gene name=g\nATG GCT\n"
+    ana = analyze(text, uri="file:///t.helix")
+    parse = [d for d in ana.diagnostics if d.code == "parse"]
+    ctx = {"context": {"diagnostics": [d.to_dict() for d in parse]}}
+    result = ca.code_actions(text, ana, ctx)
+    edit = next(a for a in result if "TAA" in a["title"])
+    changes = edit["edit"]["changes"]
+    assert any(k.startswith("file://") for k in changes)

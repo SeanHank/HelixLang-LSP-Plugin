@@ -1,0 +1,32 @@
+[project]
+name = "helixlang-lsp"
+version = "1.0.0"
+description = "Language Server Protocol server for the HelixLang DSL (.helix)"
+requires-python = ">=3.11"
+dependencies = ["helixlang>=1.0.0"]
+readme = "README.md"
+
+[project.scripts]
+helixlang-lsp = "helixlang_lsp.main:main"
+
+[project.optional-dependencies]
+dev = ["pytest>=7.4", "pytest-cov>=4.1", "ruff>=0.4", "mypy>=1.8"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["helixlang_lsp", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B"]
+
+[tool.mypy]
+python_version = "3.11"
+files = ["helixlang_lsp"]
+strict = false
+warn_unused_ignores = true
+disable_error_code = ["import-untyped"]

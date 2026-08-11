@@ -1,0 +1,25 @@
+{
+  "file": "20_diauxic_growth.helix",
+  "uri": "file:///Users/admin/PycharmProjects/HelixLang/examples/20_diauxic_growth.helix",
+  "diagnostics": [],
+  "hover_position": {
+    "line": 27,
+    "character": 1
+  },
+  "hover": {
+    "contents": {
+      "kind": "markdown",
+      "value": "`ATG` **→ OP_START** (Met, M)  \noperand = 2 (wobble G)  \ntable: `standard`\n\n**Family aliases:**\n\n`ATG`"
+    },
+    "range": {
+      "start": {
+        "line": 27,
+        "character": 0
+      },
+      "end": {
+        "line": 27,
+        "character": 3
+      }
+    }
+  }
+}

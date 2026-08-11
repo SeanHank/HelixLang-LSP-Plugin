@@ -1,0 +1,94 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: write
+
+jobs:
+  server:
+    name: Server (Python 3.11)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: server
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install "helixlang @ git+https://github.com/SeanHank/HelixLang.git"
+          python -m pip install -e ".[dev]"
+
+      - name: Lint (ruff)
+        run: python -m ruff check .
+
+      - name: Types (mypy)
+        run: python -m mypy helixlang_lsp
+
+      - name: Test (pytest + coverage)
+        run: python -m pytest tests --cov=helixlang_lsp --cov-fail-under=85
+
+      - name: Latency budgets (un-instrumented)
+        run: python -m pytest tests/test_latency.py
+
+  plugin:
+    name: Plugin (JDK 17, Gradle)
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.plugin-version.outputs.value }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/gradle-build-action@v2
+        with:
+          gradle-version: wrapper
+
+      - name: Resolve plugin version
+        id: plugin-version
+        run: echo "value=$(grep -E '^pluginVersion=' gradle.properties | cut -d= -f2)" >> "$GITHUB_OUTPUT"
+
+      - name: Build (test + buildPlugin + verifyPlugin)
+        run: ./gradlew build --no-daemon
+
+      - name: Upload plugin artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: helixlang-ide
+          path: build/distributions/*.zip
+
+  release:
+    name: Publish GitHub Release (v${{ needs.plugin.outputs.version }})
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [server, plugin]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: helixlang-ide
+
+      - name: Create or update release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="${{ needs.plugin.outputs.version }}"
+          TAG="v${VERSION}"
+          gh release create "$TAG" helixlang-ide/*.zip \
+            --repo "${{ github.repository }}" \
+            --title "HelixLang-IDE ${VERSION}" \
+            --generate-notes \
+            --latest \
+            --force

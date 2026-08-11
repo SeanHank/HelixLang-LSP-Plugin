@@ -1,0 +1,69 @@
+<idea-plugin>
+  <id>com.helixlang.ide</id>
+  <name>HelixLang</name>
+  <vendor url="https://github.com/SeanHank/HelixLang-LSP-Plugin">Sean Hank</vendor>
+  <description><![CDATA[
+    Language Server Protocol support for the HelixLang DSL (.helix).
+    Diagnostics, hover, completion, navigation, structure, semantic
+    highlighting, inlay hints, run/disassemble integration, and a DAP
+    line debugger.
+  ]]></description>
+  <idea-version since-build="222.0"/>
+  <depends>com.intellij.modules.platform</depends>
+  <depends>com.intellij.modules.lang</depends>
+  <depends>com.intellij.modules.python</depends>
+  <depends>com.intellij.modules.xdebugger</depends>
+
+  <extensions defaultExtensionNs="com.intellij">
+    <fileType name="Helix" extensions="helix"
+              implementationClass="com.helixlang.plugin.filetype.HelixFileType"
+              fieldName="INSTANCE" language="Helix"/>
+    <lang.parserDefinition language="Helix"
+              implementationClass="com.helixlang.plugin.psi.HelixParserDefinition"/>
+    <lang.syntaxHighlighterFactory language="Helix"
+              implementationClass="com.helixlang.plugin.syntax.HelixSyntaxHighlighterFactory"/>
+    <lang.braceMatcher language="Helix"
+              implementationClass="com.helixlang.plugin.syntax.HelixBraceMatcher"/>
+    <lang.commenter language="Helix"
+              implementationClass="com.helixlang.plugin.syntax.HelixCommenter"/>
+    <externalAnnotator language="Helix"
+              implementationClass="com.helixlang.plugin.lsp.handlers.HelixDiagnosticsAnnotator"/>
+    <externalAnnotator language="Helix"
+              implementationClass="com.helixlang.plugin.lsp.handlers.HelixSemanticTokensAnnotator"/>
+    <completion.contributor language="Helix"
+              implementationClass="com.helixlang.plugin.lsp.handlers.HelixCompletionContributor"/>
+    <lang.findUsagesProvider language="Helix"
+              implementationClass="com.helixlang.plugin.psi.HelixFindUsagesProvider"/>
+    <findUsagesHandlerFactory implementation="com.helixlang.plugin.lsp.handlers.HelixFindUsagesHandlerFactory"/>
+    <gotoDeclarationHandler implementationClass="com.helixlang.plugin.lsp.handlers.HelixGotoDeclarationHandler"/>
+    <structureViewBuilder language="Helix"
+              implementationClass="com.helixlang.plugin.lsp.handlers.HelixStructureViewBuilderFactory"/>
+    <lang.foldingBuilder language="Helix"
+              implementationClass="com.helixlang.plugin.syntax.HelixClientFoldingBuilder"/>
+    <configurationType implementation="com.helixlang.plugin.run.HelixRunConfigurationType"/>
+    <runConfigurationProducer implementation="com.helixlang.plugin.run.HelixRunConfigurationProducer"/>
+    <xdebugger.breakpointType implementation="com.helixlang.plugin.debug.HelixXLineBreakpointType"/>
+    <programRunner implementation="com.helixlang.plugin.debug.HelixDebuggerRunner" order="first"/>
+    <projectService serviceImplementation="com.helixlang.plugin.lsp.HelixLspServerManager"/>
+    <projectService serviceImplementation="com.helixlang.plugin.lsp.handlers.HelixInlayHintsController"/>
+    <projectService serviceImplementation="com.helixlang.plugin.actions.DisassemblyToolWindow"/>
+    <applicationConfigurable instance="com.helixlang.plugin.settings.HelixSettingsConfigurable"
+                             id="helixlang.settings" displayName="HelixLang"/>
+  </extensions>
+
+  <projectListeners>
+    <listener class="com.helixlang.plugin.lsp.listeners.HelixProjectOpenedListener"
+              topic="com.intellij.openapi.project.ProjectManagerListener"/>
+    <listener class="com.helixlang.plugin.lsp.listeners.HelixDocumentListener"
+              topic="com.intellij.openapi.editor.event.DocumentListener"/>
+    <listener class="com.helixlang.plugin.lsp.listeners.HelixEditorListener"
+              topic="com.intellij.openapi.editor.event.EditorFactoryListener"/>
+  </projectListeners>
+
+  <actions>
+    <action id="Helix.ShowDisassembly" class="com.helixlang.plugin.actions.ShowDisassemblyAction"
+            text="Show Bytecode Disassembly" description="Disassemble the current .helix file">
+      <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+    </action>
+  </actions>
+</idea-plugin>

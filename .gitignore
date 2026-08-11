@@ -1,0 +1,39 @@
+# Gradle
+.gradle/
+build/
+out/
+*.zip
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+.benchmarks/
+dist/
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Environment & secrets
+.env
+.env.*
+
+# Logs
+*.log
+
+# OS & editors
+.DS_Store
+*~
+*.swp

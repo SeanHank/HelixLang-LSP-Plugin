@@ -1,0 +1,25 @@
+{
+  "file": "12_multi_species.helix",
+  "uri": "file:///Users/admin/PycharmProjects/HelixLang/examples/12_multi_species.helix",
+  "diagnostics": [],
+  "hover_position": {
+    "line": 18,
+    "character": 1
+  },
+  "hover": {
+    "contents": {
+      "kind": "markdown",
+      "value": "`ATG` **→ OP_START** (Met, M)  \noperand = 2 (wobble G)  \ntable: `standard`\n\n**Family aliases:**\n\n`ATG`"
+    },
+    "range": {
+      "start": {
+        "line": 18,
+        "character": 0
+      },
+      "end": {
+        "line": 18,
+        "character": 3
+      }
+    }
+  }
+}
