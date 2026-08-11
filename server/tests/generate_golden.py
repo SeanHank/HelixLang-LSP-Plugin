@@ -15,13 +15,14 @@ import os
 from helixlang_lsp.analysis import analyze
 from helixlang_lsp.features.hover import hover
 
-EXAMPLES = "/Users/admin/PycharmProjects/HelixLang/examples/*.helix"
+EXAMPLES_DIR = os.environ.get(
+    "HELIX_EXAMPLES_DIR", "/Users/admin/PycharmProjects/HelixLang/examples")
 GOLDEN_DIR = os.path.join(os.path.dirname(__file__), "golden")
 
 
 def main() -> None:
     os.makedirs(GOLDEN_DIR, exist_ok=True)
-    for path in sorted(glob.glob(EXAMPLES)):
+    for path in sorted(glob.glob(os.path.join(EXAMPLES_DIR, "*.helix"))):
         uri = "file://" + path
         text = open(path, encoding="utf-8").read()
         ana = analyze(text, uri=uri)

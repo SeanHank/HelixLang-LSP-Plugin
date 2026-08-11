@@ -14,8 +14,9 @@ import pytest
 from helixlang_lsp.analysis import analyze
 from helixlang_lsp.features.hover import hover
 
-EXAMPLES = sorted(glob.glob(
-    "/Users/admin/PycharmProjects/HelixLang/examples/*.helix"))
+EXAMPLES_DIR = os.environ.get(
+    "HELIX_EXAMPLES_DIR", "/Users/admin/PycharmProjects/HelixLang/examples")
+EXAMPLES = sorted(glob.glob(os.path.join(EXAMPLES_DIR, "*.helix")))
 GOLDEN_DIR = os.path.join(os.path.dirname(__file__), "golden")
 
 # every example must have a golden file
