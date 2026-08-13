@@ -68,7 +68,7 @@ python -m mypy helixlang_lsp
 python -m pytest tests --cov=helixlang_lsp --cov-fail-under=85
 ```
 
-See the project's [CONTRIBUTING.md](https://github.com/SeanHank/HelixLang-LSP-Plugin/CONTRIBUTING.md) for details.
+See the project's [CONTRIBUTING.md](https://github.com/SeanHank/HelixLang-LSP-Plugin/blob/main/CONTRIBUTING.md) for details.
 
 ## License
 
