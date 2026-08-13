@@ -4,7 +4,6 @@ import com.google.gson.JsonObject
 import com.helixlang.plugin.lsp.protocol.LspFraming
 import com.intellij.openapi.diagnostic.Logger
 import java.io.InputStream
-import java.io.OutputStream
 import java.net.Socket
 
 /**
@@ -21,13 +20,14 @@ class TcpTransport(
 
     @Volatile private var socket: Socket? = null
     @Volatile private var consumer: ((JsonObject) -> Unit)? = null
-    private val writeLock = Any()
+    @Volatile private var writer: AsyncFrameWriter? = null
     private var readerThread: Thread? = null
 
     override fun start() {
         val sock = Socket()
         sock.connect(java.net.InetSocketAddress(host, port), 5000)
         socket = sock
+        writer = AsyncFrameWriter(log, sock.getOutputStream()).also { it.start() }
         val thread = Thread(
             { readLoop(sock) },
             "helix-lsp-tcp-reader",
@@ -50,17 +50,8 @@ class TcpTransport(
     }
 
     override fun send(message: JsonObject) {
-        val sock = socket ?: return
-        val bytes = LspFraming.frame(message.toString())
-        synchronized(writeLock) {
-            try {
-                val out: OutputStream = sock.getOutputStream()
-                out.write(bytes)
-                out.flush()
-            } catch (t: Throwable) {
-                log.warn("LSP TCP write failed: ${t.message}")
-            }
-        }
+        if (socket == null) return
+        writer?.enqueue(LspFraming.frame(message.toString()))
     }
 
     override fun setMessageConsumer(consumer: (JsonObject) -> Unit) {
@@ -68,6 +59,7 @@ class TcpTransport(
     }
 
     override fun dispose() {
+        writer?.stop()
         try {
             socket?.close()
         } catch (_: Throwable) {

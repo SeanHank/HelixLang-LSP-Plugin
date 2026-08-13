@@ -1,7 +1,7 @@
 """``textDocument/semanticTokens/full`` — token classification.
 
 Legend (doc/03 §9): keyword, type, function, variable, number, string,
-comment, operator; modifiers: declaration, defaultLibrary. Codons are
+comment, operator, arrow; modifiers: declaration, defaultLibrary. Codons are
 classified by their decoded opcode family. Output uses LSP relative delta
 encoding.
 """
@@ -57,7 +57,7 @@ def semantic_tokens(text: str, analysis: Analysis,
         elif kind == "ANNOT_END":
             _add(abs_tokens, line, col, len(value), "keyword", 0)
         elif kind == "ARROW":
-            _add(abs_tokens, line, col, len(value), "operator", 0)
+            _add(abs_tokens, line, col, len(value), "arrow", 0)
         elif kind == "FIELD":
             _classify_field(abs_tokens, line, col, value, analysis)
         elif kind == "CODON":

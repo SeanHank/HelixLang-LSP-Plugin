@@ -5,6 +5,7 @@ import com.helixlang.plugin.lsp.HelixLspServerManager
 import com.helixlang.plugin.lsp.protocol.LspConstants
 import com.helixlang.plugin.lsp.protocol.LspMessages
 import com.helixlang.plugin.settings.HelixSettings
+import com.helixlang.plugin.syntax.HelixSyntaxHighlighter
 import com.intellij.lang.annotation.AnnotationHolder
 import com.intellij.lang.annotation.ExternalAnnotator
 import com.intellij.openapi.application.ApplicationManager
@@ -105,7 +106,7 @@ class HelixSemanticTokensAnnotator : ExternalAnnotator<String?, List<HelixSemant
     companion object {
         val TOKEN_TYPE_NAMES = listOf(
             "keyword", "type", "function", "variable", "number",
-            "string", "comment", "operator")
+            "string", "comment", "operator", "arrow")
 
         val KEY_FOR_TYPE: Map<String, TextAttributesKey> = mapOf(
             "keyword" to TextAttributesKey.createTextAttributesKey(
@@ -124,6 +125,7 @@ class HelixSemanticTokensAnnotator : ExternalAnnotator<String?, List<HelixSemant
                 "HELIX_SEMANTIC_COMMENT", DefaultLanguageHighlighterColors.LINE_COMMENT),
             "operator" to TextAttributesKey.createTextAttributesKey(
                 "HELIX_SEMANTIC_OPERATOR", DefaultLanguageHighlighterColors.OPERATION_SIGN),
+            "arrow" to HelixSyntaxHighlighter.OPERATOR,
         )
     }
 }

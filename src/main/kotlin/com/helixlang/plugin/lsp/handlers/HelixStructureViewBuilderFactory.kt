@@ -61,11 +61,17 @@ class HelixStructureViewModel(
         val manager = file.project.getService(HelixLspServerManager::class.java) ?: return emptyList()
         if (!manager.isReady) return emptyList()
         val uri = file.virtualFile?.url ?: return emptyList()
+        // The structure-view API in the 2022.2 baseline has no async builder
+        // (AsyncStructureViewBuilder arrived later), so this stays synchronous.
+        // It only ever runs once per structure-view open (a user-triggered action),
+        // the transport no longer blocks on the wire, and a hung server degrades
+        // to the mini-PSI fallback after the short timeout.
         return try {
             val response = manager.request(
                 LspConstants.DOCUMENT_SYMBOL,
                 LspMessages.requestFull(LspConstants.DOCUMENT_SYMBOL, uri),
-            ).get(1500, TimeUnit.MILLISECONDS)
+                1000,
+            ).get(1000, TimeUnit.MILLISECONDS)
             val array = response.getAsJsonObject("result").getAsJsonArray()
             decodeSymbols(array)
         } catch (_: Exception) {

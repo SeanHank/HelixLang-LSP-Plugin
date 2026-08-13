@@ -32,24 +32,36 @@ class HelixCompletionContributor : CompletionContributor(), DumbAware {
             ?.getService(HelixLspServerManager::class.java)
 
         if (server != null && server.isReady && fileUri != null) {
-            val future = server.request(
+            server.request(
                 LspConstants.COMPLETION,
                 com.helixlang.plugin.lsp.protocol.LspMessages.requestPosition(
                     LspConstants.COMPLETION, fileUri, line, character),
-            )
-            try {
-                val completed = future.get(500, java.util.concurrent.TimeUnit.MILLISECONDS)
-                val items = completed.getAsJsonObject("result")
-                    .getAsJsonArray("items")
-                for (item in items) {
-                    result.addElement(mapItem(item.asJsonObject))
+                1500,
+            ).whenComplete { completed, error ->
+                if (error != null || completed == null) {
+                    addFallback(result)
+                    return@whenComplete
                 }
-                return
-            } catch (_: Exception) {
-                // fall through to static fallback
+                val items = try {
+                    completed.getAsJsonObject("result").getAsJsonArray("items")
+                } catch (_: Exception) {
+                    null
+                }
+                if (items == null) {
+                    addFallback(result)
+                    return@whenComplete
+                }
+                for (item in items) {
+                    if (item.isJsonObject) result.addElement(mapItem(item.asJsonObject))
+                }
             }
+            return
         }
 
+        addFallback(result)
+    }
+
+    private fun addFallback(result: CompletionResultSet) {
         if (HelixSettings.getInstance().completionFallbackEnabled) {
             for (item in STATIC_ITEMS) result.addElement(item)
         }

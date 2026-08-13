@@ -85,7 +85,7 @@ _CAPABILITIES = {
     "semanticTokensProvider": {
         "legend": {
             "tokenTypes": ["keyword", "type", "function", "variable", "number",
-                           "string", "comment", "operator"],
+                           "string", "comment", "operator", "arrow"],
             "tokenModifiers": ["declaration", "defaultLibrary"],
         },
         "range": False,

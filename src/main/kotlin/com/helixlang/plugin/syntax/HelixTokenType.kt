@@ -8,6 +8,7 @@ class HelixTokenElement(debugName: String) : IElementType(debugName, com.helixla
 object HelixTokenType {
     val ANNOTATION = HelixTokenElement("HELIX_ANNOTATION")
     val FIELD = HelixTokenElement("HELIX_FIELD")
+    val OPERATOR = HelixTokenElement("HELIX_OPERATOR")
     val NUMBER = HelixTokenElement("HELIX_NUMBER")
     val STRING = HelixTokenElement("HELIX_STRING")
     val COMMENT = HelixTokenElement("HELIX_COMMENT")

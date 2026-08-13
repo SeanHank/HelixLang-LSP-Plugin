@@ -5,6 +5,7 @@ import com.helixlang.plugin.lsp.HelixLspServerManager
 import com.helixlang.plugin.lsp.protocol.LspConstants
 import com.helixlang.plugin.lsp.protocol.LspMessages
 import com.intellij.openapi.Disposable
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.Inlay
@@ -14,7 +15,6 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.Disposer
 import com.intellij.util.messages.MessageBusConnection
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.TimeUnit
 
 /**
  * Inlay hints (doc/04 §5.9). Sends `textDocument/inlayHint` on editor open and
@@ -72,28 +72,38 @@ class HelixInlayHintsController(private val project: Project) : DocumentListener
         if (!manager.isReady) return
         val file = FileDocumentManager.getInstance().getFile(document) ?: return
         val uri = file.url
-        try {
-            val future = manager.request(
-                LspConstants.INLAY_HINT,
-                LspMessages.requestFull(LspConstants.INLAY_HINT, uri),
-            )
-            val response = future.get(1500, TimeUnit.MILLISECONDS)
-            val hints = response.getAsJsonObject("result").getAsJsonArray()
-            val max = document.textLength
-            for (hint in hints) {
-                if (!hint.isJsonObject) continue
-                val obj = hint.asJsonObject
-                val pos = obj.getAsJsonObject("position")
-                val line = pos.get("line").asInt
-                val character = pos.get("character").asInt
-                val label = obj.get("label")?.asString ?: continue
-                val offset = offsetAt(document, line, character) ?: continue
-                if (offset < 0 || offset > max) continue
-                val inlay = editor.inlayModel.addInlineElement(offset, true, LabelRenderer(label)) ?: continue
-                holder.inlays.add(inlay)
+        val stamp = holder.stamp
+        manager.request(
+            LspConstants.INLAY_HINT,
+            LspMessages.requestFull(LspConstants.INLAY_HINT, uri),
+            1500,
+        ).whenComplete { response, throwable ->
+            if (throwable != null || response == null) return@whenComplete
+            val hints = try {
+                response.getAsJsonObject("result").getAsJsonArray()
+            } catch (_: Exception) {
+                return@whenComplete
             }
-        } catch (_: Exception) {
-            // server not reachable or timed out; drop hints quietly
+            ApplicationManager.getApplication().invokeLater {
+                if (editor.isDisposed) return@invokeLater
+                val liveHolder = byEditor[editor] ?: return@invokeLater
+                if (document.modificationStamp != stamp) return@invokeLater
+                val max = document.textLength
+                val rendered = mutableListOf<Inlay<*>>()
+                for (hint in hints) {
+                    if (!hint.isJsonObject) continue
+                    val obj = hint.asJsonObject
+                    val pos = obj.get("position")?.takeIf { it.isJsonObject } ?: continue
+                    val label = obj.get("label")?.asString ?: continue
+                    val line = pos.asJsonObject.get("line").asInt
+                    val character = pos.asJsonObject.get("character").asInt
+                    val offset = offsetAt(document, line, character) ?: continue
+                    if (offset < 0 || offset > max) continue
+                    val inlay = editor.inlayModel.addInlineElement(offset, true, LabelRenderer(label)) ?: continue
+                    rendered.add(inlay)
+                }
+                liveHolder.inlays.addAll(rendered)
+            }
         }
     }
 
