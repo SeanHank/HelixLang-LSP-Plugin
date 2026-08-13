@@ -1,4 +1,4 @@
-"""Generate golden snapshots for the 20 HelixLang examples.
+"""Generate golden snapshots for all HelixLang examples.
 
 Writes ``tests/golden/<nn_name>.json`` containing the publishDiagnostics
 snapshot (expected zero errors) and a hover snapshot at the first codon.
