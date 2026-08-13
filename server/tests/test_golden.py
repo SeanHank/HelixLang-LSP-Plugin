@@ -1,4 +1,4 @@
-"""Golden-file tests: 20 examples must produce the recorded snapshots.
+"""Golden-file tests: every example must produce a recorded snapshot.
 
 Each golden file records the publishDiagnostics payload (expected zero errors)
 and a hover snapshot at a representative codon position (doc/03 §13).
@@ -19,14 +19,18 @@ EXAMPLES_DIR = os.environ.get(
 EXAMPLES = sorted(glob.glob(os.path.join(EXAMPLES_DIR, "*.helix")))
 GOLDEN_DIR = os.path.join(os.path.dirname(__file__), "golden")
 
-# every example must have a golden file
-assert EXAMPLES, "no HelixLang examples found"
-assert len(EXAMPLES) == 20
-
 
 def _golden_path(example: str) -> str:
     name = os.path.basename(example).replace(".helix", ".json")
     return os.path.join(GOLDEN_DIR, name)
+
+
+# Every example must have a golden file; the upstream example set can grow
+# beyond the original 20, so only a baseline floor is enforced here.
+assert EXAMPLES, "no HelixLang examples found"
+assert len(EXAMPLES) >= 20, "HelixLang example set shrank below the 20-example baseline"
+missing = [os.path.basename(e) for e in EXAMPLES if not os.path.exists(_golden_path(e))]
+assert not missing, f"examples missing golden files: {missing}"
 
 
 @pytest.mark.parametrize("path", EXAMPLES)
