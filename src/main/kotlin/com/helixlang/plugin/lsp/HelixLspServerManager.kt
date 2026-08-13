@@ -11,7 +11,6 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.Project
 import java.util.concurrent.CompletableFuture
-import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
@@ -79,15 +78,30 @@ class HelixLspServerManager(private val project: Project) : Disposable {
             com.helixlang.plugin.lsp.protocol.LspMessages.initialize(rootUriOf(project)),
             10_000,
         )
-        val result = initialize.get(10, TimeUnit.SECONDS)
-        serverInfo = run {
-            val info = result.getAsJsonObject("result").getAsJsonObject("serverInfo")
-            val name = info.get("name")?.asString ?: "helixlang-lsp"
-            val version = info.get("version")?.asString ?: "?"
-            "$name $version"
+        initialize.whenComplete { result, error ->
+            if (disposed) return@whenComplete
+            if (error != null) {
+                log.warn("server initialize failed: ${error.message}")
+                val deadTransport = localTransport
+                ApplicationManager.getApplication().executeOnPooledThread {
+                    try {
+                        deadTransport.dispose()
+                    } catch (_: Throwable) {
+                    }
+                }
+                status = Status.STOPPED
+                scheduleRestart()
+                return@whenComplete
+            }
+            serverInfo = runCatching {
+                val info = result.getAsJsonObject("result").getAsJsonObject("serverInfo")
+                val name = info.get("name")?.asString ?: "helixlang-lsp"
+                val version = info.get("version")?.asString ?: "?"
+                "$name $version"
+            }.getOrNull()
+            localDispatcher.notify(LspConstants.INITIALIZED, null)
+            status = Status.READY
         }
-        localDispatcher.notify(LspConstants.INITIALIZED, null)
-        status = Status.READY
     }
 
     private fun onNotification(message: JsonObject) {
@@ -122,11 +136,11 @@ class HelixLspServerManager(private val project: Project) : Disposable {
         return java.io.File(basePath).toURI().toString()
     }
 
-    fun request(method: String, params: JsonObject?): CompletableFuture<JsonObject> {
+    fun request(method: String, params: JsonObject?, timeoutMs: Long = 5000): CompletableFuture<JsonObject> {
         ensureStarted()
         val d = dispatcher ?: return CompletableFuture.failedFuture(
             IllegalStateException("server not available"))
-        return d.request(method, params)
+        return d.request(method, params, timeoutMs)
     }
 
     fun notify(method: String, params: JsonObject?) {

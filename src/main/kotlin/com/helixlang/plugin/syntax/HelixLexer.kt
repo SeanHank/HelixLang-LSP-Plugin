@@ -73,7 +73,7 @@ class HelixLexer : LexerBase() {
             }
             c == '=' || c in "->" -> {
                 end = start + 1
-                state = HelixTokenType.FIELD
+                state = HelixTokenType.OPERATOR
             }
             c == '[' -> {
                 end = start + 1

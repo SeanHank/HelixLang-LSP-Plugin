@@ -21,6 +21,10 @@ object HelixServerDescriptor {
 
     private val log = Logger.getInstance(HelixServerDescriptor::class.java)
 
+    /** Probe results keyed by interpreter path; a probe can take up to 15 s per
+     *  candidate, so cache aggressively (invalidated only via [clearCache]). */
+    private val importCache = java.util.concurrent.ConcurrentHashMap<String, Boolean>()
+
     val REFERENCE_INTERPRETER: File =
         File("/opt/anaconda3/envs/helix/bin/python")
 
@@ -67,7 +71,9 @@ object HelixServerDescriptor {
 
     /** True if `<python> -c "import helixlang, helixlang_lsp"` succeeds. */
     fun canImport(python: File): Boolean {
-        return try {
+        val key = python.absolutePath
+        importCache[key]?.let { return it }
+        val ok = try {
             val proc = ProcessBuilder(
                 python.absolutePath, "-c", "import helixlang, helixlang_lsp",
             ).redirectErrorStream(true).start()
@@ -77,6 +83,13 @@ object HelixServerDescriptor {
             log.warn("interpreter check failed for $python: ${t.message}")
             false
         }
+        importCache[key] = ok
+        return ok
+    }
+
+    /** Forget cached probe results so the next [canImport] re-checks from scratch. */
+    fun clearCache() {
+        importCache.clear()
     }
 
     private fun findOnPath(name: String): File? {

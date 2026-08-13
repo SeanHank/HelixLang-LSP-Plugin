@@ -245,7 +245,7 @@ class FoldingRange:
 # ---------- Semantic tokens ----------
 
 TOKEN_TYPES = ["keyword", "type", "function", "variable", "number", "string",
-               "comment", "operator"]
+               "comment", "operator", "arrow"]
 TOKEN_MODIFIERS = ["declaration", "defaultLibrary"]
 
 TOKEN_TYPE_INDEX = {name: i for i, name in enumerate(TOKEN_TYPES)}

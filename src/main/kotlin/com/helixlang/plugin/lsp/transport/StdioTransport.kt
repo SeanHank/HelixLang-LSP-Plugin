@@ -22,7 +22,7 @@ class StdioTransport(
 
     @Volatile private var process: Process? = null
     @Volatile private var consumer: ((JsonObject) -> Unit)? = null
-    private val writeLock = Any()
+    @Volatile private var writer: AsyncFrameWriter? = null
     private var readerThread: Thread? = null
     private val framing = LspFraming()
 
@@ -30,6 +30,7 @@ class StdioTransport(
         val child = command.createProcess()
         process = child
         ProcessIOExecutorService.INSTANCE.execute { child.waitFor() }
+        writer = AsyncFrameWriter(log, child.outputStream).also { it.start() }
         val thread = Thread(
             { readLoop(child) },
             "helix-lsp-reader",
@@ -58,16 +59,8 @@ class StdioTransport(
     }
 
     override fun send(message: JsonObject) {
-        val child = process ?: return
-        val bytes = LspFraming.frame(message.toString())
-        synchronized(writeLock) {
-            try {
-                child.outputStream.write(bytes)
-                child.outputStream.flush()
-            } catch (t: Throwable) {
-                log.warn("LSP write failed: ${t.message}")
-            }
-        }
+        if (process == null) return
+        writer?.enqueue(LspFraming.frame(message.toString()))
     }
 
     override fun setMessageConsumer(consumer: (JsonObject) -> Unit) {
@@ -80,6 +73,7 @@ class StdioTransport(
             child.outputStream.close()
         } catch (_: Throwable) {
         }
+        writer?.stop()
         try {
             child.destroy()
         } catch (_: Throwable) {

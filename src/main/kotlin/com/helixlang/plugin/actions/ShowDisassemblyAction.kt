@@ -30,24 +30,28 @@ class ShowDisassemblyAction : AnAction() {
         val file: VirtualFile = event.getRequiredData(CommonDataKeys.VIRTUAL_FILE)
         val manager = project.getService(HelixLspServerManager::class.java)
 
-        val disassembly: String
-        if (manager != null && manager.isReady) {
-            val params = com.google.gson.JsonObject().apply {
-                addProperty("command", LspConstants.HELIX_DISASSEMBLE)
-                add("arguments", com.google.gson.JsonArray().apply { add(file.url) })
+        com.intellij.openapi.application.ApplicationManager.getApplication()
+            .executeOnPooledThread {
+                val disassembly: String
+                if (manager != null && manager.isReady) {
+                    val params = com.google.gson.JsonObject().apply {
+                        addProperty("command", LspConstants.HELIX_DISASSEMBLE)
+                        add("arguments", com.google.gson.JsonArray().apply { add(file.url) })
+                    }
+                    val future = manager.request(LspConstants.WORKSPACE_EXECUTE_COMMAND, params)
+                    disassembly = try {
+                        future.get(5000, TimeUnit.MILLISECONDS)
+                            .getAsJsonObject("result")?.get("result")?.asString ?: ""
+                    } catch (_: Exception) {
+                        ""
+                    }
+                } else {
+                    disassembly = cliDisassemble(file)
+                }
+                com.intellij.openapi.application.ApplicationManager.getApplication().invokeLater {
+                    if (!project.isDisposed) DisassemblyToolWindow.show(project, file.name, disassembly)
+                }
             }
-            val future = manager.request(LspConstants.WORKSPACE_EXECUTE_COMMAND, params)
-            disassembly = try {
-                future.get(5000, TimeUnit.MILLISECONDS)
-                    .getAsJsonObject("result")?.get("result")?.asString ?: ""
-            } catch (_: Exception) {
-                ""
-            }
-        } else {
-            disassembly = cliDisassemble(file)
-        }
-
-        DisassemblyToolWindow.show(project, file.name, disassembly)
     }
 
     private fun cliDisassemble(file: VirtualFile): String {

@@ -27,6 +27,8 @@ class HelixSyntaxHighlighter : SyntaxHighlighterBase() {
             "HELIX_ANNOTATION", DefaultLanguageHighlighterColors.KEYWORD)
         val FIELD: TextAttributesKey = TextAttributesKey.createTextAttributesKey(
             "HELIX_FIELD", DefaultLanguageHighlighterColors.INSTANCE_FIELD)
+        val OPERATOR: TextAttributesKey = TextAttributesKey.createTextAttributesKey(
+            "HELIX_OPERATOR", DefaultLanguageHighlighterColors.IDENTIFIER)
         val NUMBER: TextAttributesKey = TextAttributesKey.createTextAttributesKey(
             "HELIX_NUMBER", DefaultLanguageHighlighterColors.NUMBER)
         val STRING: TextAttributesKey = TextAttributesKey.createTextAttributesKey(
@@ -48,6 +50,7 @@ class HelixSyntaxHighlighter : SyntaxHighlighterBase() {
             mapOf(
                 HelixTokenType.ANNOTATION to ANNOTATION,
                 HelixTokenType.FIELD to FIELD,
+                HelixTokenType.OPERATOR to OPERATOR,
                 HelixTokenType.NUMBER to NUMBER,
                 HelixTokenType.STRING to STRING,
                 HelixTokenType.COMMENT to COMMENT,

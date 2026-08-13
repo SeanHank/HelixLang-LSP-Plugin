@@ -77,8 +77,18 @@ class HelixSettingsConfigurable : SearchableConfigurable {
     override fun createComponent(): JComponent {
         testButton.addActionListener {
             val python = java.io.File(interpreter.text)
-            val ok = com.helixlang.plugin.lsp.HelixServerDescriptor.canImport(python)
-            status.text = if (ok) "OK: helixlang importable" else "FAILED: cannot import helixlang"
+            testButton.isEnabled = false
+            status.text = "Checking..."
+            com.intellij.openapi.application.ApplicationManager.getApplication()
+                .executeOnPooledThread {
+                    com.helixlang.plugin.lsp.HelixServerDescriptor.clearCache()
+                    val ok = com.helixlang.plugin.lsp.HelixServerDescriptor.canImport(python)
+                    com.intellij.openapi.application.ApplicationManager.getApplication().invokeLater {
+                        testButton.isEnabled = true
+                        status.text =
+                            if (ok) "OK: helixlang importable" else "FAILED: cannot import helixlang"
+                    }
+                }
         }
         val box = VerticalBox()
         box.add(row("Interpreter:", interpreter))

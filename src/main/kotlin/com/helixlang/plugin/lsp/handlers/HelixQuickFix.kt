@@ -36,23 +36,29 @@ class HelixQuickFixPlaceholder(
         if (!manager.isReady) return
 
         val params = codeActionParams(uri, diagnostic)
-        val edit = try {
-            val response = manager.request(LspConstants.CODE_ACTION, params)
-                .get(1500, TimeUnit.MILLISECONDS)
-            val actions = response.getAsJsonObject("result").getAsJsonArray()
-            var first: JsonObject? = null
-            for (action in actions) {
-                if (action.isJsonObject && action.asJsonObject.has("edit")) {
-                    first = action.asJsonObject
-                    break
+        com.intellij.openapi.application.ApplicationManager.getApplication()
+            .executeOnPooledThread {
+                val edit = try {
+                    val response = manager.request(LspConstants.CODE_ACTION, params)
+                        .get(1500, TimeUnit.MILLISECONDS)
+                    val actions = response.getAsJsonObject("result").getAsJsonArray()
+                    var first: JsonObject? = null
+                    for (action in actions) {
+                        if (action.isJsonObject && action.asJsonObject.has("edit")) {
+                            first = action.asJsonObject
+                            break
+                        }
+                    }
+                    first?.getAsJsonObject("edit")
+                } catch (_: Exception) {
+                    null
+                }
+                if (edit == null) return@executeOnPooledThread
+                com.intellij.openapi.application.ApplicationManager.getApplication().invokeLater {
+                    if (project.isDisposed) return@invokeLater
+                    applyWorkspaceEdit(project, edit)
                 }
             }
-            first?.getAsJsonObject("edit")
-        } catch (_: Exception) {
-            null
-        }
-        if (edit == null) return
-        applyWorkspaceEdit(project, edit)
     }
 
     private fun codeActionParams(uri: String, d: HelixDiagnostic): JsonObject {

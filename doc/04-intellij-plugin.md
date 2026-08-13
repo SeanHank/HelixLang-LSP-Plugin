@@ -450,7 +450,7 @@ server round-trip is a P1 placeholder; `⏳` = not started (P1/P2).
 **Build status:** `./gradlew build` (JUnit tests, `buildPlugin`, `verifyPlugin`)
 is green on JDK 17 / Gradle 7.6.4 against the PyCharm `2022.2.3`
 (== build 222.3345.118) SDK; artifact at
-`build/distributions/helixlang-ide-1.0.0.zip`. Known `verifyPlugin` warnings are
+`build/distributions/helixlang-ide-2026.8.0.zip`. Known `verifyPlugin` warnings are
 limited to the IPGP/Kotlin 1.8.22 OOM hint and harmless UI-DSL deprecations.
 
 ---

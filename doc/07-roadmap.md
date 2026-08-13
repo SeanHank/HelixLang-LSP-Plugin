@@ -53,7 +53,7 @@ UI complete.
 - Inlay hints (P0), quick-fixes, formatting (P1), DAP debugger (P1).
 - Performance budgets, manual checklist, marketplace packaging.
 
-**Exit criteria:** `v1.0.0` published to JetBrains Marketplace; release blog.
+**Exit criteria:** `v2026.8.0` published to JetBrains Marketplace; release blog.
 
 ### M5 — Hardening (ongoing)
 

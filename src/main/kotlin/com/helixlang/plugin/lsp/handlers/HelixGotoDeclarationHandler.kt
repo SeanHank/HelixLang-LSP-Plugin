@@ -35,17 +35,27 @@ class HelixGotoDeclarationHandler : GotoDeclarationHandler {
             val future = manager.request(
                 LspConstants.DEFINITION,
                 LspMessages.requestPosition(LspConstants.DEFINITION, fileUri, line, character),
+                2000,
             )
-            try {
-                val result = future.get(1000, java.util.concurrent.TimeUnit.MILLISECONDS)
-                val locations = result.getAsJsonObject("result").getAsJsonArray()
-                if (locations.size() > 0) {
-                    val target = locationElement(project, locations[0].asJsonObject)
-                    if (target != null) return arrayOf(target)
+            future.whenComplete { response, error ->
+                if (error != null || response == null) return@whenComplete
+                val locations = try {
+                    response.getAsJsonObject("result").getAsJsonArray()
+                } catch (_: Exception) {
+                    return@whenComplete
                 }
-            } catch (_: Exception) {
-                // fall through to mini-PSI fallback
+                if (locations.size() == 0) return@whenComplete
+                val target = locationElement(project, locations[0].asJsonObject) ?: return@whenComplete
+                val navigable = target as? com.intellij.navigation.NavigationItem ?: return@whenComplete
+                com.intellij.openapi.application.ApplicationManager.getApplication().invokeLater {
+                    if (!project.isDisposed) navigable.navigate(true)
+                }
             }
+            // Return the offline fallback immediately so the EDT is never held
+            // waiting for the server; the server target, when faster, navigates
+            // asynchronously.
+            val symbol: HelixSymbol = file.symbolAt(offset) ?: return null
+            return arrayOf(file)
         }
 
         val symbol: HelixSymbol = file.symbolAt(offset) ?: return null

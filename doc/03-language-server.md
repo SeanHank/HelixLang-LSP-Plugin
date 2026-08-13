@@ -133,7 +133,7 @@ if needed (max 512 diagnostics per message, remainder queued).
   "foldingRangeProvider": true,
   "diagnosticProvider": { "interFileDependencies": false, "workspaceDiagnostics": false },
   "semanticTokensProvider": {
-    "legend": { "tokenTypes": ["keyword","type","function","variable","number","string","comment","operator"], "tokenModifiers": ["declaration","defaultLibrary"] },
+    "legend": { "tokenTypes": ["keyword","type","function","variable","number","string","comment","operator","arrow"], "tokenModifiers": ["declaration","defaultLibrary"] },
     "range": false,
     "full": true
   },
