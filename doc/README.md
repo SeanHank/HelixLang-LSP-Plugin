@@ -39,13 +39,19 @@ The design is grounded in the HelixLang language and its reference
 implementation:
 
 - **Language specification:** `HelixLang/doc/language-spec.md` (alphabet,
-  annotation syntax, codon table, bytecode format, runtime semantics, type system).
+  annotation syntax, codon table, bytecode format, runtime semantics, type
+  system) — incl. `#config backend`, the sim keys, and the structural
+  annotations `#media`/`#enzyme`/`#metabolite`/`#sim`.
+- **Simulation wiring:** `HelixLang/doc/helix-language-wiring.md` (the
+  W-1…W-6 work that made the simulation library reachable from `.helix`
+  source; the language surface this plugin's docs track).
 - **Compiler design:** `HelixLang/doc/compiler-design.md` (Lexer → Parser →
   AST → Semantic → Compiler → Chunk → VM).
 - **Compiler API:** `HelixLang/src/helixlang/` — the Python modules that the
   language server wraps (lexer, parser, semantic, compiler, codon_table,
-  disassembler, debugger, errors).
-- **Example programs:** `HelixLang/examples/*.helix` — the acceptance corpus.
+  disassembler, debugger, errors, `sim_runtime`).
+- **Example programs:** `HelixLang/examples/*.helix` — the acceptance corpus
+  (34 programs, incl. the sim-backend examples 31–34).
 
 ## Glossary
 
@@ -60,6 +66,8 @@ implementation:
 | **Mini-PSI** | A deliberately tiny, regex-based PSI subset defined on the client for navigation features, decoupled from the full semantic analysis performed by the server. |
 | **Diagnostic** | An error, warning, or information item attached to a range of a document (`textDocument/publishDiagnostics`). |
 | **DAP** | Debug Adapter Protocol; used (P1) to expose the HelixLang bytecode debugger in the IDE. |
+| **Backend** | `#config backend` / CLI `--backend`: selects which runtime executes a program — `classic` (bytecode VM, default) or the sim backends `whole_cell`, `population`, `fba`, `calibration`, `benchmark`. |
+| **`#sim`** | Open `key=value` annotation (`Program.sim_extensions`); a forward-compatible hook that registers long-tail simulation apps (e.g. `#sim kind=spatial_dfba`). |
 | **Reference interpreter** | `/opt/anaconda3/envs/helix/bin/python` — the canonical Python 3.11.15 (conda env `helix`) used for the server, tests, and run configurations. |
 
 ---

@@ -3,7 +3,7 @@
   "uri": "file:///Users/admin/PycharmProjects/HelixLang/examples/22_pattern_synthesis.helix",
   "diagnostics": [],
   "hover_position": {
-    "line": 29,
+    "line": 30,
     "character": 1
   },
   "hover": {
@@ -13,11 +13,11 @@
     },
     "range": {
       "start": {
-        "line": 29,
+        "line": 30,
         "character": 0
       },
       "end": {
-        "line": 29,
+        "line": 30,
         "character": 3
       }
     }

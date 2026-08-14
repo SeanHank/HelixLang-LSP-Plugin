@@ -58,7 +58,7 @@ environment.
 ```toml
 [project]
 name = "helixlang-lsp"
-version = "2026.8.0"
+version = "2026.8.1"
 requires-python = ">=3.11"
 dependencies = ["helixlang>=1.0.0"]
 [project.scripts]
@@ -91,7 +91,7 @@ un-instrumented run of `tests/test_latency.py`.
 | Unit | pure feature functions | `hover` returns expected Markdown for a codon |
 | Transport | framing parse/serialize, JSON-RPC correlation | malformed `Content-Length` recovery |
 | Conformance | full wire-protocol round trip with `FakeClient` | open → type → assert `publishDiagnostics` |
-| Golden | 20 examples, zero diagnostics + hover snapshots | `examples/02_lac_operon.helix` |
+| Golden | examples **01–34** with golden snapshots (zero diagnostics + hover; sim-only examples use the first-annotation fallback position); a 20-example floor is enforced at import | `examples/02_lac_operon.helix` |
 | Error matrix | one source per error class | §8.1 table |
 | Latency | 64 KB synthetic file budgets | p95 diagnostics < 100 ms, hover < 50 ms |
 | Cross-client | minimal echo client against `--stdio` and `--tcp` | smoke |

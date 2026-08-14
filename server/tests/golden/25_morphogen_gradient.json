@@ -3,7 +3,7 @@
   "uri": "file:///Users/admin/PycharmProjects/HelixLang/examples/25_morphogen_gradient.helix",
   "diagnostics": [],
   "hover_position": {
-    "line": 24,
+    "line": 20,
     "character": 1
   },
   "hover": {
@@ -13,11 +13,11 @@
     },
     "range": {
       "start": {
-        "line": 24,
+        "line": 20,
         "character": 0
       },
       "end": {
-        "line": 24,
+        "line": 20,
         "character": 3
       }
     }

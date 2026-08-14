@@ -64,7 +64,9 @@ be reused by other editors (VS Code, Neovim) later.
                                 │ imports                                    │               │
 ┌───────────────────────────────▼─────────────────────────────────────────┐               │
 │  Layer 3: HelixLang kernel — Lexer, Parser, SemanticAnalyzer, Compiler, │               │
-│  disassembler, debugger, errors (src/helixlang)                         │               │
+│  disassembler, debugger, errors, and the sim-runtime adapter            │               │
+│  (sim_runtime.run → classic VM or whole_cell/population/fba/            │               │
+│  calibration/benchmark), src/helixlang                                  │               │
 └─────────────────────────────────────────────────────────────────────────┘               │
 ```
 
@@ -102,9 +104,15 @@ Ctrl+<hover> over codon "GCT"
 Run "sample.helix"
    HelixRunConfiguration
    ──> GeneralCommandLine: <python> -m helixlang <file> [--table] [--ticks]
+   │                                       [--backend NAME] [--csv|--json]
    ──> OSProcessHandler ──> console view (stdout) / tool window
    optional: --disassemble ──> dedicated disassembly tab
 ```
+
+`--backend NAME` overrides the source's `#config backend` (any of
+`classic | whole_cell | population | fba | calibration | benchmark`); `--json`
+emits the `SimResult` payload for the sim backends. Both are surfaced by the
+run configuration (`doc/04` §6.1).
 
 ## 4. Concurrency model
 

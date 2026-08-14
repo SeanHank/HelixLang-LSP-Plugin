@@ -251,6 +251,23 @@ The table selection affects ORF stop-codon detection and opcode decoding:
 - The `table_name` is carried into every feature result (hover shows the table
   that produced the decoding).
 
+### 7.4 Simulation surface (upstream W-1…W-6)
+
+Since the simulation wiring, the upstream parser also exposes:
+
+- `#config backend = classic | whole_cell | population | fba | calibration |
+  benchmark` (`classic` default) → `Program.config.backend`;
+- every other `#config` key collected verbatim into `Program.config.sim`
+  (typed coercion is the sim adapter's job, `SimConfigError` on bad values);
+- the structural annotations `#media` / `#enzyme` / `#metabolite` and the open
+  `#sim key=value` extension point (`Program.sim_extensions`) — parsed by the
+  upstream parser, inert (warned) under `classic`.
+
+The server reads these through the same `Analysis` object (§7.1); none of them
+change the classic compile pipeline. The server's lenient structural pass
+(`analysis.py` `_structural_check`) accepts them via its extended
+`ANNOTATION_KINDS` and `REQUIRED_FIELDS` (item 1 in the §14 sync table, ✅).
+
 ## 8. Diagnostics
 
 ### 8.1 Error → diagnostic mapping
@@ -307,7 +324,8 @@ opt-in `helix.validate.runVm` (default `false`) runs the VM for the configured
 - **Token types** in the legend: `keyword` (annotation kinds `#gene`,
   `#promoter`, `#regulate`, `#lsystem`, `#field`, `#config`, `#type`,
   `#crispr`, `#evolve`, `#methylate`, `#histone`, `#transcribe`,
-  `#translate`, `#quorum`, `#end`), `type` (type annotations: `Protein`,
+  `#translate`, `#quorum`, `#media`, `#enzyme`, `#metabolite`, `#sim`,
+  `#end`), `type` (type annotations: `Protein`,
   `Signal`, `Float`, …), `function` (gene symbols), `variable` (promoter
   symbols), `number` (field values), `string` (quoted values), `comment`
   (`# ...`), `operator` (`->`).
@@ -337,12 +355,20 @@ Contents (Markdown):
   the effective table. Includes the full codon family table for the family
   (all aliases).
 - **On an annotation kind:** its grammar + allowed fields (from the language
-  spec, embedded as server-side doc data).
+  spec, embedded as server-side doc data) — including `#media`
+  (`nutrient=`/`concentration=`/`diffusion_um2_s=`), `#enzyme`
+  (`gene=`/`reaction=`/`kcat=`), `#metabolite` (`name=`/`init=`), and `#sim`
+  (open `key=value`; the `kind=` values dispatch to long-tail backends).
 - **On a gene/promoter name:** definition line, promoter, ORF summary (start/
   stop codons, amino-acid count), and any regulation edges touching it.
 - **On a field name/value:** documented field semantics (e.g. `strength`
   ranges, `table` choices, `output` formats, `units` choices, `species`).
-- **On a config value:** config defaults and allowed values.
+- **On a config value:** config defaults and allowed values — including
+  `backend` (`classic | whole_cell | population | fba | calibration |
+  benchmark`, default `classic`) and the typed sim keys (§7.4; the coerceable
+  enums `division_rule`, `replication_mode`, `protein_maturation_mode`,
+  `mechanics`, and `fba_model=core|<path>`, `seed=`, and the redefined
+  `output=` column selection for sim backends).
 
 ### 10.2 Completion
 
@@ -351,9 +377,9 @@ sensitive:
 
 | Context | Items |
 |---------|-------|
-| after `#` | annotation kinds (`gene`, `promoter`, `regulate`, `lsystem`, `field`, `config`, `type`, `crispr`, `evolve`, `methylate`, `histone`, `transcribe`, `translate`, `quorum`) with doc summaries |
-| annotation field names | per-kind field list: `#gene`: `name`, `promoter`, `call_target`; `#config`: `ticks`, `output`, `table`, `ops_per_tick`, `react_steps`, `use_central_dogma`, `species`, `units`; … |
-| field values | enums: `table` ∈ {standard, mito_vertebrate, ciliate}; `species` ∈ {ecoli, yeast, human}; `units` ∈ {gameplay, real}; `output` ∈ {stdout, csv, png, none}; `cas` ∈ {SpCas9, SaCas9, Cas12a}; `repair` ∈ {NHEJ, HDR}; `mark` ∈ {H3K4me3, H3K27me3, H3K36me3, H3K9me3, H3K27ac}; `methylase` ∈ {dam, dcm, cpg} |
+| after `#` | annotation kinds (`gene`, `promoter`, `regulate`, `lsystem`, `field`, `config`, `type`, `crispr`, `evolve`, `methylate`, `histone`, `transcribe`, `translate`, `quorum`, `media`, `enzyme`, `metabolite`, `sim`) with doc summaries |
+| annotation field names | per-kind field list: `#gene`: `name`, `promoter`, `call_target`; `#media`: `nutrient`, `concentration`, `diffusion_um2_s`; `#enzyme`: `gene`, `reaction`, `kcat`; `#metabolite`: `name`, `init`; `#config`: the classic keys (`ticks`, `output`, `table`, `ops_per_tick`, `react_steps`, `use_central_dogma`, `species`, `units`) plus `backend` and the sim keys (wiring doc `helix-language-wiring.md` §6.2; §7.4 here); `#sim`: open `key=value` (`kind=` for the long-tail backends); … |
+| field values | enums: `backend` ∈ {classic, whole_cell, population, fba, calibration, benchmark}; `table` ∈ {standard, mito_vertebrate, ciliate}; `species` ∈ {ecoli, yeast, human}; `units` ∈ {gameplay, real}; `output` ∈ {stdout, csv, png, none} (classic) / a comma-separated column list (sim backends); `division_rule` ∈ {energy, adder}; `replication_mode` ∈ {flat, cooper_helmstetter}; `protein_maturation_mode` ∈ {instant, chaperone}; `mechanics` ∈ {none, shove, …}; `dynfba`/`signaling`/`crowding`/`dfba` ∈ {true, false}; `fba_model` ∈ {core, \<path\>}; `cas` ∈ {SpCas9, SaCas9, Cas12a}; `repair` ∈ {NHEJ, HDR}; `mark` ∈ {H3K4me3, H3K27me3, H3K36me3, H3K9me3, H3K27ac}; `methylase` ∈ {dam, dcm, cpg} |
 | `name=`, `promoter=` in `#gene` | defined promoters (from symbol table) |
 | `source -> ` / `-> target` in `#regulate` | defined genes/promoters |
 | `target=` in bio instructions | defined genes |
@@ -397,6 +423,10 @@ Program
  ├─ Regulation p_lacI -> lacI   (kind=Operator)
  ├─ LSystem name="plant"        (kind=Class)
  ├─ Field size=32               (kind=Class)
+ ├─ Media nutrient=GLC          (kind=Class)
+ ├─ Enzyme gene=glk             (kind=Class)
+ ├─ Metabolite name=glc__D      (kind=Class)
+ ├─ Sim kind=spatial_dfba       (kind=Event)
  ├─ Config                     (kind=Constant)
  └─ BioInstructions (#crispr…)  (kind=Event)
 ```
@@ -408,6 +438,9 @@ Program
 - `#gene … #end` blocks (kind `region`).
 - DNA bodies longer than 3 lines (kind `region`).
 - Long annotation fields (lsystem rules strings) — disabled by default.
+- The structural annotations `#media`/`#enzyme`/`#metabolite`/`#sim` are
+  single-line declarations (no `#end`); like `#field` and `#config` they
+  produce no folding region of their own.
 - Client-side fallback folding (see plugin doc) mirrors these rules when the
   server is offline.
 
@@ -489,9 +522,15 @@ be unit-tested without the transport.
   with a `FakeClient` that speaks the LSP wire protocol: open a file, type,
   assert `publishDiagnostics` payloads; request hover/completion/etc., assert
   exact JSON shapes.
-- **Golden files:** for each of the 20 `examples/*.helix`, a golden
+- **Golden files:** for each `examples/*.helix`, a golden
   `publishDiagnostics` snapshot (expected zero errors) and a hover snapshot for
-  representative positions.
+  representative positions. Snapshots currently exist for examples **01–34**
+  (`31_whole_cell_adder.helix`, `32_colony_dfba.helix`,
+  `33_fba_diauxie.helix`, `34_whole_cell_calibration.helix`, plus the
+  rewritten 10/16/20/21/24/30 and the W-6 `#sim kind=` examples).
+  `tests/test_golden.py` enforces a **20-example floor** at import and fails on
+  any example without a snapshot. For examples with no codons (sim-only), the
+  snapshot hover position falls back to the first annotation.
 - **Error matrix tests:** every row of the §8.1 table is exercised with a
   crafted source that triggers exactly that error.
 - **Latency budget tests:** analyze a synthetic 64 KB file; assert
@@ -501,6 +540,32 @@ be unit-tested without the transport.
   in a separate un-instrumented step.
 - **Cross-client compatibility:** a smoke test runs the `client_test`
   utilities from the LSP spec (if available) or a minimal JSON-RPC echo client.
+
+---
+
+## 14. Language-surface sync status (upstream W-1…W-6)
+
+The upstream language surface changed in `HelixLang/doc/helix-language-wiring.md`
+(W-1…W-6, implemented upstream Aug 2026). The upstream parser/AST already
+expose it (§7.4), so the server's analysis pipeline sees it for free; what
+needed to catch up was the **server-side feature data** that enumerates kinds
+and keys. Status legend: ✅ implemented in `server/helixlang_lsp/` ·
+🟡 pending (this document is the design contract for it).
+
+| New surface (upstream) | Server module(s) affected | Status |
+|------------------------|---------------------------|:------:|
+| `#media` / `#enzyme` / `#metabolite` / `#sim` accepted by the lenient structural pass (today they are mis-flagged "unknown annotation", `_structural_check`) | `analysis.py` (`ANNOTATION_KINDS`, `REQUIRED_FIELDS`) | ✅ |
+| `#media` / `#enzyme` / `#metabolite` / `#sim` in the semantic-token legend | `features/semantic_tokens.py` (§9 keyword list) | ✅ |
+| Completion after `#` (4 new kinds) and `#config` sim keys / `backend` enum / redefined `output=` | `features/completion.py` (`ANNOTATION_KINDS`, `FIELD_SETS`, `FIELD_DOCS`, `ENUM_VALUES`) | ✅ |
+| Hover docs for the 4 structural annotations and the sim config keys | `features/hover.py` (`ANNOTATION_DOCS`) | ✅ |
+| Document-symbol nodes (Media/Enzyme/Metabolite/Sim) | `features/document_symbols.py` | ✅ |
+| `#media`/`#enzyme`/`#metabolite`/`#sim` single-line parsing (no folding region) | `features/folding.py` — no change (single-line annotations already handled) | ✅ |
+| Golden snapshots for examples 31–34 (+ any rewritten example drift) | `tests/golden/*.json`, `tests/generate_golden.py` | ✅ |
+| Static client fallback list and run-config `--backend`/`--json` | plugin (`doc/04` §5.3, §6.1) | ✅ |
+
+Note the upstream `classic` path is bit-identical, so the server's classic
+feature data (codons, bio instructions) is unchanged; the new surface is purely
+additive.
 
 ---
 

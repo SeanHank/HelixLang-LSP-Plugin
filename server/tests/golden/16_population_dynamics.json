@@ -3,7 +3,7 @@
   "uri": "file:///Users/admin/PycharmProjects/HelixLang/examples/16_population_dynamics.helix",
   "diagnostics": [],
   "hover_position": {
-    "line": 18,
+    "line": 9,
     "character": 1
   },
   "hover": {
@@ -13,11 +13,11 @@
     },
     "range": {
       "start": {
-        "line": 18,
+        "line": 9,
         "character": 0
       },
       "end": {
-        "line": 18,
+        "line": 9,
         "character": 3
       }
     }

@@ -3,7 +3,7 @@
   "uri": "file:///Users/admin/PycharmProjects/HelixLang/examples/11_protein_structure.helix",
   "diagnostics": [],
   "hover_position": {
-    "line": 14,
+    "line": 15,
     "character": 1
   },
   "hover": {
@@ -13,11 +13,11 @@
     },
     "range": {
       "start": {
-        "line": 14,
+        "line": 15,
         "character": 0
       },
       "end": {
-        "line": 14,
+        "line": 15,
         "character": 3
       }
     }

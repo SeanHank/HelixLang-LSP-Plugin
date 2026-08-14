@@ -230,9 +230,9 @@ Every push to `main` builds the plugin and **publishes a GitHub Release**
 tagged `v<version>` (created or updated), with the plugin zip attached.
 
 The version is configured in **one place**:
-[`gradle.properties`](gradle.properties) → `pluginVersion=2026.8.0`.
+[`gradle.properties`](gradle.properties) → `pluginVersion=2026.8.1`.
 
-- Bump `pluginVersion` and push → CI releases `v2026.8.0`, `v2026.9.0`, …
+- Bump `pluginVersion` and push → CI releases `v2026.8.1`, `v2026.9.0`, …
 - Re-pushing the same version overwrites that release (delete + recreate).
 
 ## Coding conventions

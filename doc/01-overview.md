@@ -10,12 +10,22 @@
 [HelixLang](https://github.com/SeanHank/HelixLang) is a domain-specific language
 in which **DNA is the source code**: a `.helix` file mixes DNA sequence blocks
 (runs of `A/C/G/T`, split into codons) with `#`-prefixed annotation blocks
-(`#gene`, `#promoter`, `#regulate`, `#lsystem`, `#field`, `#config`, and bio
-instructions). The compiler maps each codon to a bytecode opcode through a
-switchable "translation table" (standard / mitochondrial / ciliate) and runs the
-result on a stack-based bytecode VM ("the ribosome") that simulates a cell.
+(`#gene`, `#promoter`, `#regulate`, `#lsystem`, `#field`, `#config`, the bio
+instructions, and — since the W-1…W-6 wiring, `helix-language-wiring.md` —
+the structural annotations `#media`/`#enzyme`/`#metabolite` and the open
+`#sim key=value` extension point). The compiler maps each codon to a bytecode
+opcode through a switchable "translation table" (standard / mitochondrial /
+ciliate) and runs the result on a stack-based bytecode VM ("the ribosome") that
+simulates a cell.
 
-Today HelixLang ships a CLI, a Python API, a Flask web visualization, and 20
+Since the simulation wiring, a single `#config backend` switch selects *which*
+runtime executes a program: `classic` (the bytecode VM, the default) or the
+quantitative simulation library — `whole_cell`, `population`, `fba`,
+`calibration`, `benchmark` (`helixlang/sim_runtime.py`, see
+`HelixLang/doc/helix-language-wiring.md`). The classic path is bit-identical to
+the pre-wiring behaviour.
+
+Today HelixLang ships a CLI, a Python API, a Flask web visualization, and 34
 example programs — but **no IDE integration**. Editing `.helix` files means
 working in a plain-text editor with no syntax highlighting, no diagnostics, no
 navigation, and no way to run or debug a program from the IDE.
@@ -47,9 +57,12 @@ PyCharm 2022.2 and later**.
 - Rewriting or forking the HelixLang compiler.
 - Supporting the Flask web visualization from within the IDE (launched externally).
 - Replacing the existing CLI or Python API.
-- Bio-module analytics inside the IDE (protein structure, FBA, CRISPR design
-  workflows remain Python-library / CLI features; the plugin only exposes run
-  output and the static language features).
+- Bio-module analytics *inside the IDE*: the sim backends (FBA, whole-cell,
+  population, calibration, benchmark) are now reachable from `.helix` source via
+  `#config backend` and from the CLI via `--backend`/`--json`, but the plugin
+  only exposes **run output and the static language features** — it does not
+  render flux tables, colony observables, or calibration scores in IDE panels
+  (those remain CLI / Python-library surfaces).
 - A general-purpose "anything editor" LSP client (the client is HelixLang-specific).
 
 ## 5. High-level architecture
@@ -76,6 +89,8 @@ PyCharm 2022.2 and later**.
 ┌───────────────────────────────▼────────────────────────────────────────────┐
 │   HelixLang compiler & runtime (src/helixlang/*)                            │
 │   Lexer → Parser → SemanticAnalyzer → Compiler → Chunk → (optional) VM      │
+│   sim_runtime.run(program) → SimResult   (backend: classic | whole_cell |   │
+│   population | fba | calibration | benchmark)                               │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 

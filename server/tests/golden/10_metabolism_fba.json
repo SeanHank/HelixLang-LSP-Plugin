@@ -3,7 +3,7 @@
   "uri": "file:///Users/admin/PycharmProjects/HelixLang/examples/10_metabolism_fba.helix",
   "diagnostics": [],
   "hover_position": {
-    "line": 19,
+    "line": 9,
     "character": 1
   },
   "hover": {
@@ -13,11 +13,11 @@
     },
     "range": {
       "start": {
-        "line": 19,
+        "line": 9,
         "character": 0
       },
       "end": {
-        "line": 19,
+        "line": 9,
         "character": 3
       }
     }

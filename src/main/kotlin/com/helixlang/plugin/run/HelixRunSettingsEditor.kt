@@ -18,8 +18,10 @@ class HelixRunSettingsEditor : SettingsEditor<HelixRunConfiguration>() {
     private val interpreter = TextFieldWithBrowseButton()
     private val script = TextFieldWithBrowseButton()
     private val table = JComboBox(arrayOf("standard", "mito_vertebrate", "ciliate"))
+    private val backend = JComboBox(arrayOf(
+        "classic", "whole_cell", "population", "fba", "calibration", "benchmark"))
     private val ticks = JBTextField()
-    private val output = JComboBox(arrayOf("stdout", "csv", "png"))
+    private val output = JComboBox(arrayOf("stdout", "csv", "png", "json"))
     private val disassemble = JCheckBox("Disassemble first")
     private val panel: JPanel = buildPanel()
 
@@ -29,6 +31,7 @@ class HelixRunSettingsEditor : SettingsEditor<HelixRunConfiguration>() {
         grid.add(row("Interpreter:", interpreter))
         grid.add(row("Script:", script))
         grid.add(row("Translation table:", table))
+        grid.add(row("Backend:", backend))
         grid.add(row("Ticks override:", ticks))
         grid.add(row("Output format:", output))
         grid.add(disassemble)
@@ -47,6 +50,7 @@ class HelixRunSettingsEditor : SettingsEditor<HelixRunConfiguration>() {
         interpreter.text = configuration.interpreter ?: ""
         script.text = configuration.script
         table.selectedItem = configuration.table
+        backend.selectedItem = configuration.backend
         ticks.text = configuration.ticks
         output.selectedItem = configuration.output
         disassemble.isSelected = configuration.disassembleFirst
@@ -56,6 +60,7 @@ class HelixRunSettingsEditor : SettingsEditor<HelixRunConfiguration>() {
         configuration.interpreter = interpreter.text.ifBlank { null }
         configuration.script = script.text
         configuration.table = table.selectedItem as? String ?: "standard"
+        configuration.backend = backend.selectedItem as? String ?: "classic"
         configuration.ticks = ticks.text
         configuration.output = output.selectedItem as? String ?: "stdout"
         configuration.disassembleFirst = disassemble.isSelected

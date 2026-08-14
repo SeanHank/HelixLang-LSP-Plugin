@@ -226,7 +226,10 @@ tokens it does not classify, letting the lexical layer show through.
   `GENERAL` only for `#`, `=`, `>` and word starts in annotations.
 - If the server is unavailable, a **static fallback** completion list (annotation
   kinds and field names from an embedded table) is offered so `#` completion
-  always works.
+  always works. The embedded table must track the upstream surface (§14 of
+  `doc/03`): the 18 kinds (`gene`, `promoter`, `regulate`, `lsystem`, `field`,
+  `config`, `type`, the bio instructions, `media`, `enzyme`, `metabolite`,
+  `sim`) and the `#config` keys including `backend`.
 
 ### 5.4 Hover
 
@@ -299,8 +302,9 @@ re-requested in range mode).
 | Interpreter | auto-detected | `<python>` |
 | Script | current `.helix` file | `<file>` |
 | Translation table | `standard` | `--table` |
+| Backend | `classic` | `--backend NAME` (`classic` \| `whole_cell` \| `population` \| `fba` \| `calibration` \| `benchmark`); overrides the source's `#config backend` |
 | Ticks override | (empty) | `--ticks` |
-| Output format | `stdout` | `--csv`, `--png PREFIX` |
+| Output format | `stdout` | `--csv`, `--json`, `--png PREFIX` (`--png` is classic-only; sim backends emit the `#config output=` columns via `--csv`, or the `SimResult` JSON via `--json`) |
 | Disassemble first | off | `--disassemble` |
 
 `HelixRunProfileState` builds a `GeneralCommandLine`, runs it via
@@ -450,7 +454,7 @@ server round-trip is a P1 placeholder; `⏳` = not started (P1/P2).
 **Build status:** `./gradlew build` (JUnit tests, `buildPlugin`, `verifyPlugin`)
 is green on JDK 17 / Gradle 7.6.4 against the PyCharm `2022.2.3`
 (== build 222.3345.118) SDK; artifact at
-`build/distributions/helixlang-ide-2026.8.0.zip`. Known `verifyPlugin` warnings are
+`build/distributions/helixlang-ide-2026.8.1.zip`. Known `verifyPlugin` warnings are
 limited to the IPGP/Kotlin 1.8.22 OOM hint and harmless UI-DSL deprecations.
 
 ---

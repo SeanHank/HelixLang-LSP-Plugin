@@ -38,9 +38,9 @@ client integration point from the plugin (`doc/04`).
 | **Trigger** | mouse move over a codon / annotation / symbol / field (350 ms debounce) |
 | **LSP** | `textDocument/hover` |
 | **Client** | `JBHtmlEditorKit` tooltip (mini Markdown renderer) |
-| **Content** | codon → opcode + amino acid + wobble operand + table; annotation → grammar + fields; gene/promoter → summary + regulation edges; field → semantics |
+| **Content** | codon → opcode + amino acid + wobble operand + table; annotation → grammar + fields (incl. `#media`/`#enzyme`/`#metabolite`/`#sim`); gene/promoter → summary + regulation edges; field → semantics; config → defaults + allowed values (incl. `backend` and the sim keys) |
 | **Edge cases** | no data ⇒ no tooltip (don't show empty); hover over mid-edit garbage returns nothing; long content scrolls |
-| **Acceptance** | golden hover snapshots for the 20 examples |
+| **Acceptance** | golden hover snapshots for every example with a snapshot (01–34, incl. the sim-only examples that fall back to the first annotation) |
 
 ## 4. Code completion (P0)
 
@@ -49,10 +49,10 @@ client integration point from the plugin (`doc/04`).
 | **Trigger** | `#`, `=`, `>`, and word-start inside annotations; manual Ctrl+Space |
 | **LSP** | `textDocument/completion` |
 | **Client** | `HelixCompletionContributor`; static fallback list when server offline |
-| **Items** | annotation kinds; per-kind fields; enum values (table/species/units/output/cas/repair/mark/methylase); symbol names for `promoter=`, `target=`, `->`; 64 codon snippets; type names |
+| **Items** | annotation kinds; per-kind fields; enum values (backend/table/species/units/output/division_rule/replication_mode/protein_maturation_mode/mechanics/cas/repair/mark/methylase); symbol names for `promoter=`, `target=`, `->`; 64 codon snippets; type names |
 | **Sorting** | required fields first; symbol names before keywords; case-insensitive |
 | **Edge cases** | completion inside a comment disabled; `#` completion also available mid-line; item docs from server markdown |
-| **Acceptance** | typing `#` shows 16 annotation kinds; typing `#config ` shows its 9 fields; `table=` offers `standard|mito_vertebrate|ciliate` |
+| **Acceptance** | typing `#` shows the 18 annotation kinds; typing `#config ` shows the classic keys plus `backend` and the sim keys; `backend=` offers `classic\|whole_cell\|population\|fba\|calibration\|benchmark`; `table=` offers `standard\|mito_vertebrate\|ciliate` |
 
 ## 5. Go-to-definition (P0)
 
@@ -81,7 +81,7 @@ client integration point from the plugin (`doc/04`).
 | **Trigger** | Structure tool window; breadcrumbs; Ctrl+O |
 | **LSP** | `textDocument/documentSymbol` (hierarchical); mini-PSI fallback |
 | **Client** | `HelixStructureViewBuilderFactory` |
-| **Hierarchy** | Program → Gene/Promoter/Regulation/LSystem/Field/Config/BioInstructions |
+| **Hierarchy** | Program → Gene/Promoter/Regulation/LSystem/Field/Media/Enzyme/Metabolite/Sim/Config/BioInstructions |
 | **Acceptance** | structure of every example shows genes + promoters; nodes navigate to their ranges |
 
 ## 8. Folding (P0)
@@ -136,9 +136,9 @@ client integration point from the plugin (`doc/04`).
 | | |
 |---|---|
 | **Trigger** | Run configuration / gutter run icon |
-| **Client** | `HelixRunConfigurationType` + `GeneralCommandLine` (CLI parity) |
-| **Output** | trace lines in Run console; optional CSV/PNG; disassembly tab |
-| **Acceptance** | running `01_hello_dna.helix` prints the same final trace as the CLI |
+| **Client** | `HelixRunConfigurationType` + `GeneralCommandLine` (CLI parity; `--table`, `--backend`, `--ticks`, `--csv`/`--json`/`--png`) |
+| **Output** | trace lines in Run console; optional CSV / JSON (`SimResult` for sim backends) / PNG (classic); disassembly tab |
+| **Acceptance** | running `01_hello_dna.helix` prints the same final trace as the CLI; running `31_whole_cell_adder.helix` (or `33_fba_diauxie.helix`) with the source's `#config backend` prints the same history/flux table as `helixlang <file> --csv` |
 
 ## 14. Disassembly view (P0)
 

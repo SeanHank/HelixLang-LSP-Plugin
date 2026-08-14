@@ -1,9 +1,9 @@
 {
-  "file": "30_virtual_cell.helix",
-  "uri": "file:///Users/admin/PycharmProjects/HelixLang/examples/30_virtual_cell.helix",
+  "file": "34_whole_cell_calibration.helix",
+  "uri": "file:///Users/admin/PycharmProjects/HelixLang/examples/34_whole_cell_calibration.helix",
   "diagnostics": [],
   "hover_position": {
-    "line": 6,
+    "line": 5,
     "character": 2
   },
   "hover": {
@@ -13,11 +13,11 @@
     },
     "range": {
       "start": {
-        "line": 6,
+        "line": 5,
         "character": 0
       },
       "end": {
-        "line": 6,
+        "line": 5,
         "character": 0
       }
     }

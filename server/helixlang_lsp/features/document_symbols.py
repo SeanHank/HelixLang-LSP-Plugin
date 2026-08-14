@@ -28,6 +28,10 @@ _KIND_MAP: dict[str, int] = {
     "transcribe": SymbolKind["event"],
     "translate": SymbolKind["event"],
     "quorum": SymbolKind["event"],
+    "media": SymbolKind["class"],
+    "enzyme": SymbolKind["class"],
+    "metabolite": SymbolKind["class"],
+    "sim": SymbolKind["event"],
     "dna": SymbolKind["module"],
 }
 
@@ -62,6 +66,18 @@ def document_symbols(text: str, analysis: Analysis,
 
 
 def _symbol_name(ann: Any) -> str:
+    if ann.kind == "media":
+        nut = next((f.value for f in ann.fields if f.key == "nutrient"), "")
+        return f"Media nutrient={nut}"
+    if ann.kind == "enzyme":
+        gene = next((f.value for f in ann.fields if f.key == "gene"), "")
+        return f"Enzyme gene={gene}"
+    if ann.kind == "metabolite":
+        name = next((f.value for f in ann.fields if f.key == "name"), "")
+        return f"Metabolite name={name}"
+    if ann.kind == "sim":
+        kind = next((f.value for f in ann.fields if f.key == "kind"), "")
+        return f"Sim kind={kind}" if kind else "Sim"
     for f in ann.fields:
         if f.key == "name":
             return f.value

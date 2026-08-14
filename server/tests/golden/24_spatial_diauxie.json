@@ -3,7 +3,7 @@
   "uri": "file:///Users/admin/PycharmProjects/HelixLang/examples/24_spatial_diauxie.helix",
   "diagnostics": [],
   "hover_position": {
-    "line": 16,
+    "line": 6,
     "character": 1
   },
   "hover": {
@@ -13,11 +13,11 @@
     },
     "range": {
       "start": {
-        "line": 16,
+        "line": 6,
         "character": 0
       },
       "end": {
-        "line": 16,
+        "line": 6,
         "character": 3
       }
     }

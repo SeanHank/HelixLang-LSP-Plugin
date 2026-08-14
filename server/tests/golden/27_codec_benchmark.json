@@ -3,7 +3,7 @@
   "uri": "file:///Users/admin/PycharmProjects/HelixLang/examples/27_codec_benchmark.helix",
   "diagnostics": [],
   "hover_position": {
-    "line": 17,
+    "line": 21,
     "character": 1
   },
   "hover": {
@@ -13,11 +13,11 @@
     },
     "range": {
       "start": {
-        "line": 17,
+        "line": 21,
         "character": 0
       },
       "end": {
-        "line": 17,
+        "line": 21,
         "character": 3
       }
     }

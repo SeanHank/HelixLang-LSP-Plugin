@@ -3,7 +3,7 @@
   "uri": "file:///Users/admin/PycharmProjects/HelixLang/examples/21_quorum_circuit.helix",
   "diagnostics": [],
   "hover_position": {
-    "line": 26,
+    "line": 10,
     "character": 1
   },
   "hover": {
@@ -13,11 +13,11 @@
     },
     "range": {
       "start": {
-        "line": 26,
+        "line": 10,
         "character": 0
       },
       "end": {
-        "line": 26,
+        "line": 10,
         "character": 3
       }
     }

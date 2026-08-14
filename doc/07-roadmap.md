@@ -45,20 +45,42 @@ crash recovers within 10 s; golden tests green.
   auto-detection.
 - Disassembly action + read-only tool window.
 
-**Exit criteria:** CLI parity for run/disassemble on all 20 examples; settings
-UI complete.
+**Exit criteria:** CLI parity for run/disassemble on the example corpus
+(01–34); settings UI complete.
 
 ### M4 — Polish & release (wk 9–10)
 
 - Inlay hints (P0), quick-fixes, formatting (P1), DAP debugger (P1).
 - Performance budgets, manual checklist, marketplace packaging.
 
-**Exit criteria:** `v2026.8.0` published to JetBrains Marketplace; release blog.
+**Exit criteria:** `v2026.8.1` published to JetBrains Marketplace; release blog.
 
 ### M5 — Hardening (ongoing)
 
 - Watched-files re-scan, multi-workspace, TCP troubleshooting, Docker/remote
   transport (P2).
+
+### M6 — Language-surface sync (upstream W-1…W-6) ✅
+
+The upstream simulation wiring (`HelixLang/doc/helix-language-wiring.md`,
+W-1…W-6, implemented upstream Aug 2026) extended the language with
+`#config backend` (six backends), the structural annotations
+`#media`/`#enzyme`/`#metabolite`, the open `#sim key=value` hook, `--backend`/
+`--json` CLI flags, `POST /api/sim/run`, and four new examples (31–34) plus
+rewrites of 10/16/20/21/24/30. The parser side flows into the server for free;
+this milestone shipped the **feature-data sync** (§14 of `doc/03`, all items ✅):
+
+- Semantic-token legend, completion (`ANNOTATION_KINDS`, `FIELD_SETS`,
+  `ENUM_VALUES`), hover docs, and document-symbol nodes for the new
+  annotations and `#config` sim keys / `backend` — shipped.
+- Regenerated golden snapshots for examples 31–34 (and re-snapshotted the
+  rewritten examples 10/16/20/21/24/30 whose content changed).
+- Plugin: static-completion fallback table and the run-config
+  `--backend`/`--json` fields (`doc/04` §5.3, §6.1) — shipped.
+
+**Exit criteria:** zero diagnostics on all 34 examples with golden snapshots for
+each; typing `#` completes all 18 kinds; `#config backend=` completes the six
+backends; a sim-backend example runs from the IDE with CLI-identical output.
 
 ## 2. Acceptance criteria (v1.0)
 
@@ -82,6 +104,7 @@ UI complete.
 | Server process instability on user machines | Medium | Medium | Backoff restart, status indicator, `--trace` diagnostics, graceful degradation. |
 | Python interpreter discovery fails | Medium | Medium | Resolution chain + one-click install (P1) + bundled fallback env (P1). |
 | Semantic-token decode corruption | Low | Medium | Client round-trip test over generated corpus. |
+| Upstream language surface outpaces server feature data | High | Medium | The W-1…W-6 wiring landed upstream (new annotations, backends, examples); the M6 milestone tracks the feature-data sync (`doc/03` §14); the golden floor test fails loudly on missing snapshots; the nightly drift job (`doc/06` §5) catches parser changes. |
 | Scope creep into editor/compiler internals | Medium | High | Non-goals in `doc/01` §4 enforced in review; server never forks the compiler. |
 
 ## 4. Future work (backlog)
@@ -91,6 +114,11 @@ UI complete.
   at the cost of portability.
 - **Central-dogma-aware editor:** species-aware codon coloring, tRNA/codon-usage
   inlay annotations for `#config species=`.
+- **Sim-surface editing aids:** completion of the registered `#sim kind=`
+  long-tail backends (`spatial_dfba` + the 14 W-6 kinds); hover/validation of
+  `#config sim` keys. Note: `SimConfigError` (bad typed-coercion values) is a
+  *runtime* config error, not a static `HelixError`, so it stays out of the
+  §8.1 diagnostic matrix by design.
 - **Bio-module tooling:** CRISPR guide designer and protein-structure reports as
   IDE panels backed by the Python API (out of scope for v1 by design).
 - **Editor-agnostic bonus:** because the server is editor-independent, a thin

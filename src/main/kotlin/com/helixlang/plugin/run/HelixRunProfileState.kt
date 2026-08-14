@@ -25,6 +25,7 @@ class HelixRunConfiguration(
     var interpreter: String? = null
     var script: String = ""
     var table: String = "standard"
+    var backend: String = "classic"
     var ticks: String = ""
     var output: String = "stdout"
     var disassembleFirst: Boolean = false
@@ -57,12 +58,16 @@ class HelixRunProfileState(
             if (configuration.table != "standard") {
                 addParameters("--table", configuration.table)
             }
+            if (configuration.backend != "classic") {
+                addParameters("--backend", configuration.backend)
+            }
             if (configuration.ticks.isNotBlank()) {
                 addParameters("--ticks", configuration.ticks)
             }
             when (configuration.output) {
                 "csv" -> addParameters("--csv")
                 "png" -> addParameters("--png", outputPrefix())
+                "json" -> addParameters("--json")
                 else -> Unit
             }
             if (configuration.disassembleFirst) {

@@ -20,14 +20,44 @@ from helixlang_lsp.protocol import (
     Position,
 )
 
+CONFIG_CLASSIC_KEYS = ["ticks", "output", "table", "ops_per_tick",
+                       "react_steps", "use_central_dogma", "species", "units"]
+
+# helix-language-wiring.md §6.2: sim-backend keys preserved verbatim in
+# Program.config.sim. Names mirror the target dataclass fields.
+SIM_KEYS = [
+    # common
+    "seed",
+    # whole-cell (VirtualCellConfig)
+    "division_rule", "division_energy", "adder_volume_um3", "adder_noise_std",
+    "volume_init_um3", "biomass_to_volume_pg_per_min", "cell_density_dry_pg_um3",
+    "surface_scaling", "surface_exponent", "replication_mode", "c_period_min",
+    "d_period_min", "doubling_time_min", "chromosome_map", "energy_init",
+    "maintenance_atp_per_min", "biomass_to_atp", "transcription_atp_per_nt",
+    "translation_atp_per_aa", "protein_yield_per_mrna", "minutes_per_step",
+    "enzyme_capacity", "enzyme_scale", "protein_mass_fraction",
+    "metabolite_pools", "protein_maturation_mode", "frac_cotranslational_fold",
+    "folding_atp_per_protein", "k_fold", "misfold_rate_per_min",
+    "aggregation_rate_per_min", "degraded_rate_per_min", "protein_half_life_min",
+    # population (PopulationConfig)
+    "population_size", "grid_width", "grid_height", "grid_depth",
+    "division_threshold", "death_threshold", "signaling", "signal_diffusion",
+    "signal_threshold", "crowding", "mechanics", "noise_enabled", "noise_seed",
+    "trace_streaming", "dfba", "dfba_dt_h", "dfba_energy_scale",
+    "dfba_initial_biomass_gdw", "dfba_glucose_half_saturation_mm",
+    "dfba_oxygen_max_uptake", "dfba_oxygen_half_saturation_mm",
+    # fba (DynamicFluxBalance)
+    "fba_model", "dynfba", "fba_dt_h", "fba_glucose_mm", "fba_oxygen_max",
+    "fba_steps",
+]
+
 FIELD_SETS: dict[str, list[str]] = {
     "gene": ["name", "promoter", "call_target"],
     "promoter": ["name", "strength"],
     "regulate": [],
     "lsystem": ["name", "axiom", "rules"],
     "field": ["name", "size", "init"],
-    "config": ["ticks", "output", "table", "ops_per_tick", "react_steps",
-               "use_central_dogma", "species", "units"],
+    "config": CONFIG_CLASSIC_KEYS + ["backend"] + SIM_KEYS,
     "type": ["name"],
     "crispr": ["target", "cas", "repair"],
     "evolve": ["target", "mutation"],
@@ -36,7 +66,18 @@ FIELD_SETS: dict[str, list[str]] = {
     "transcribe": ["target"],
     "translate": ["target"],
     "quorum": ["target"],
+    "media": ["nutrient", "concentration", "diffusion_um2_s"],
+    "enzyme": ["gene", "reaction", "kcat"],
+    "metabolite": ["name", "init"],
+    "sim": ["kind"],
 }
+
+LONG_TAIL_KINDS = [
+    "3d_morphology", "codec_benchmark", "codon_usage", "cello_workflow",
+    "consortium", "digital_evolution", "directed_evolution", "fate_analysis",
+    "morphogen_gradient", "omics_calibration", "protein_fitness",
+    "protein_structure", "spatial_dfba", "stochastic", "synbio_design",
+]
 
 FIELD_DOCS: dict[str, str] = {
     "name": "Symbol name (unique).",
@@ -60,6 +101,75 @@ FIELD_DOCS: dict[str, str] = {
     "mutation": "Mutation kind.",
     "size": "Field size in lattice units.",
     "init": "Initial field value.",
+    "nutrient": "Metabolite id (e.g. GLC, O2, AC).",
+    "concentration": "Medium concentration (mM); FBA uptake bound.",
+    "diffusion_um2_s": "Fick diffusion coefficient (µm²/s).",
+    "gene": "Gene symbol bound to the reaction.",
+    "reaction": "Reaction id in the model.",
+    "kcat": "Enzyme turnover (s⁻¹).",
+    "kind": "Long-tail #sim backend selector.",
+    "backend": "classic | whole_cell | population | fba | calibration | benchmark",
+    "seed": "int | none: RNG seed for determinism.",
+    "division_rule": "energy | adder",
+    "division_energy": "ATP division threshold.",
+    "adder_volume_um3": "Adder volume increment (default 1.6).",
+    "adder_noise_std": "Relative Gaussian noise on the adder rule.",
+    "volume_init_um3": "Newborn cell volume.",
+    "biomass_to_volume_pg_per_min": "Volume-model coupling.",
+    "cell_density_dry_pg_um3": "Dry density rho (default 0.15).",
+    "surface_scaling": "bool: S/V uptake scaling.",
+    "surface_exponent": "float: default 2/3.",
+    "replication_mode": "flat | cooper_helmstetter",
+    "c_period_min": "Cooper–Helmstetter C-period (min).",
+    "d_period_min": "Cooper–Helmstetter D-period (min).",
+    "doubling_time_min": "Doubling time (min).",
+    "chromosome_map": "dict: gene=coord,... with coord in [0,1].",
+    "energy_init": "Initial ATP budget.",
+    "maintenance_atp_per_min": "Maintenance ATP flux.",
+    "biomass_to_atp": "ATP per biomass flux.",
+    "transcription_atp_per_nt": "Transcription energy cost per nt.",
+    "translation_atp_per_aa": "Translation energy cost per aa.",
+    "protein_yield_per_mrna": "Proteins per mRNA.",
+    "minutes_per_step": "Simulation step (min, default 1.0).",
+    "enzyme_capacity": "bool: Phase-4 MOMENT enzyme caps.",
+    "enzyme_scale": "kcat rescale factor.",
+    "protein_mass_fraction": "sMOMENT pool mass fraction.",
+    "metabolite_pools": "bool: pool ODE integration.",
+    "protein_maturation_mode": "instant | chaperone",
+    "frac_cotranslational_fold": "Fraction of cotranslational folding.",
+    "folding_atp_per_protein": "ATP cost per folded protein.",
+    "k_fold": "Fold-rate constant (derives fold_rate_per_min).",
+    "misfold_rate_per_min": "Misfolding rate.",
+    "aggregation_rate_per_min": "Aggregation rate.",
+    "degraded_rate_per_min": "Degradation rate.",
+    "protein_half_life_min": "Protein half-life (min).",
+    "population_size": "Colony max cell count.",
+    "grid_width": "Lattice width.",
+    "grid_height": "Lattice height.",
+    "grid_depth": "Lattice depth.",
+    "division_threshold": "Division energy gate.",
+    "death_threshold": "Death energy gate.",
+    "signaling": "bool: AI-2 quorum field.",
+    "signal_diffusion": "Signal diffusion (µm²/s).",
+    "signal_threshold": "Quorum threshold (µM).",
+    "crowding": "bool: CROMICS crowding factor.",
+    "mechanics": "none | shoving | force",
+    "noise_enabled": "bool: per-cell GRN noise.",
+    "noise_seed": "GRN noise RNG seed.",
+    "trace_streaming": "bool: per-cell snapshot streaming.",
+    "dfba": "bool: per-cell dynamic FBA.",
+    "dfba_dt_h": "dFBA integration step (h).",
+    "dfba_energy_scale": "dFBA energy scale.",
+    "dfba_initial_biomass_gdw": "Initial biomass (gDW).",
+    "dfba_glucose_half_saturation_mm": "Glucose Ks (mM).",
+    "dfba_oxygen_max_uptake": "Oxygen max uptake.",
+    "dfba_oxygen_half_saturation_mm": "Oxygen Ks (mM).",
+    "fba_model": "core | <path> (SBML/JSON model).",
+    "dynfba": "bool: DynamicFluxBalance batch.",
+    "fba_dt_h": "dFBA integration step (h).",
+    "fba_glucose_mm": "Batch glucose (mM).",
+    "fba_oxygen_max": "Respiratory O2 cap.",
+    "fba_steps": "dFBA iteration count.",
 }
 
 ENUM_VALUES: dict[str, list[str]] = {
@@ -71,6 +181,24 @@ ENUM_VALUES: dict[str, list[str]] = {
     "repair": ["NHEJ", "HDR"],
     "mark": ["H3K4me3", "H3K27me3", "H3K36me3", "H3K9me3", "H3K27ac"],
     "methylase": ["dam", "dcm", "cpg"],
+    "backend": ["classic", "whole_cell", "population", "fba",
+                "calibration", "benchmark"],
+    "division_rule": ["energy", "adder"],
+    "replication_mode": ["flat", "cooper_helmstetter"],
+    "protein_maturation_mode": ["instant", "chaperone"],
+    "mechanics": ["none", "shoving", "force"],
+    "fba_model": ["core"],
+    "seed": ["none"],
+    "surface_scaling": ["true", "false"],
+    "enzyme_capacity": ["true", "false"],
+    "metabolite_pools": ["true", "false"],
+    "signaling": ["true", "false"],
+    "crowding": ["true", "false"],
+    "noise_enabled": ["true", "false"],
+    "trace_streaming": ["true", "false"],
+    "dfba": ["true", "false"],
+    "dynfba": ["true", "false"],
+    "kind": LONG_TAIL_KINDS,
 }
 
 TYPE_VALUES = ["Protein", "Signal", "Float", "Int", "Bool", "String",
@@ -78,7 +206,8 @@ TYPE_VALUES = ["Protein", "Signal", "Float", "Int", "Bool", "String",
 
 ANNOTATION_KINDS = ["gene", "promoter", "regulate", "lsystem", "field",
                     "config", "type", "crispr", "evolve", "methylate",
-                    "histone", "transcribe", "translate", "quorum"]
+                    "histone", "transcribe", "translate", "quorum",
+                    "media", "enzyme", "metabolite", "sim"]
 
 _BIO_KINDS = {"crispr", "evolve", "methylate", "histone", "transcribe",
               "translate", "quorum"}
@@ -159,7 +288,7 @@ def _items_for_context(ctx: dict[str, Any],
                 for f in FIELD_SETS.get(ctx.get("ann_kind", ""), [])]
     if kind == "field_value":
         field = ctx.get("field", "")
-        if field in ("promoter", "call_target", "target", "source"):
+        if field in ("promoter", "call_target", "target", "source", "gene"):
             role = "promoter" if field == "promoter" else "target"
             items = [_symbol_item(n, s, n)
                      for n, s in analysis.structure.symbols.items()

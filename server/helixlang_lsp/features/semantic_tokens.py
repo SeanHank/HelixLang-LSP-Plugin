@@ -15,8 +15,25 @@ from helixlang_lsp.analysis import Analysis
 from helixlang_lsp.codons import decode_codon
 from helixlang_lsp.protocol import TOKEN_MODIFIER_INDEX, TOKEN_TYPE_INDEX, SemanticTokens
 
-_NUM_FIELDS = {"strength", "size", "ticks", "ops_per_tick", "react_steps",
-               "init", "value", "strength0", "threshold"}
+_NUM_FIELDS = {
+    "strength", "size", "ticks", "ops_per_tick", "react_steps",
+    "init", "value", "strength0", "threshold",
+    "concentration", "diffusion_um2_s", "kcat",
+    "division_energy", "adder_volume_um3", "adder_noise_std", "volume_init_um3",
+    "biomass_to_volume_pg_per_min", "cell_density_dry_pg_um3",
+    "surface_exponent", "c_period_min", "d_period_min", "doubling_time_min",
+    "energy_init", "maintenance_atp_per_min", "biomass_to_atp",
+    "transcription_atp_per_nt", "translation_atp_per_aa", "protein_yield_per_mrna",
+    "minutes_per_step", "enzyme_scale", "protein_mass_fraction",
+    "frac_cotranslational_fold", "folding_atp_per_protein", "k_fold",
+    "misfold_rate_per_min", "aggregation_rate_per_min", "degraded_rate_per_min",
+    "protein_half_life_min", "population_size", "grid_width", "grid_height",
+    "grid_depth", "division_threshold", "death_threshold", "signal_diffusion",
+    "signal_threshold", "noise_seed", "dfba_dt_h", "dfba_energy_scale",
+    "dfba_initial_biomass_gdw", "dfba_glucose_half_saturation_mm",
+    "dfba_oxygen_max_uptake", "dfba_oxygen_half_saturation_mm",
+    "fba_dt_h", "fba_glucose_mm", "fba_oxygen_max", "fba_steps",
+}
 
 _BUILD_OPS = {
     int(helix.Op.OP_BUILD_PROTEIN), int(helix.Op.OP_BUILD_MEMBRANE),
@@ -81,7 +98,7 @@ def _classify_field(abs_tokens: list[tuple[int, int, int, int, int]],
         _add(abs_tokens, line, col + len(key) + 1, len(val), t,
              TOKEN_MODIFIER_INDEX["declaration"])
         return
-    if key in ("promoter", "call_target", "target", "source"):
+    if key in ("promoter", "call_target", "target", "source", "gene", "reaction"):
         _add(abs_tokens, line, col + len(key) + 1, len(val), "variable", 0)
         return
     if key in _NUM_FIELDS and _looks_numeric(val):

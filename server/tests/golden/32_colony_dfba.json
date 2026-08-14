@@ -1,9 +1,9 @@
 {
-  "file": "14_synbio_designer.helix",
-  "uri": "file:///Users/admin/PycharmProjects/HelixLang/examples/14_synbio_designer.helix",
+  "file": "32_colony_dfba.helix",
+  "uri": "file:///Users/admin/PycharmProjects/HelixLang/examples/32_colony_dfba.helix",
   "diagnostics": [],
   "hover_position": {
-    "line": 17,
+    "line": 8,
     "character": 1
   },
   "hover": {
@@ -13,11 +13,11 @@
     },
     "range": {
       "start": {
-        "line": 17,
+        "line": 8,
         "character": 0
       },
       "end": {
-        "line": 17,
+        "line": 8,
         "character": 3
       }
     }

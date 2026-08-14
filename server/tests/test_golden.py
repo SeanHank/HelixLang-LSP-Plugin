@@ -25,6 +25,17 @@ def _golden_path(example: str) -> str:
     return os.path.join(GOLDEN_DIR, name)
 
 
+def _representative_position(ana) -> dict[str, int]:
+    """A hover position: the first codon, else the first annotation."""
+    codons = ana.structure.codon_tokens
+    if codons:
+        return {"line": codons[0].line0, "character": codons[0].col0 + 1}
+    anns = ana.structure.annotations
+    if anns:
+        return {"line": anns[0].line0, "character": anns[0].col0 + 2}
+    return {"line": 0, "character": 0}
+
+
 # Every example must have a golden file; the upstream example set can grow
 # beyond the original 20, so only a baseline floor is enforced here.
 assert EXAMPLES, "no HelixLang examples found"
@@ -45,9 +56,7 @@ def test_example_zero_errors(path: str):
 def test_golden_snapshot_matches(path: str):
     text = open(path, encoding="utf-8").read()
     ana = analyze(text, uri="file://" + path)
-    codons = ana.structure.codon_tokens
-    position = {"line": codons[0].line0, "character": codons[0].col0 + 1} \
-        if codons else {"line": 0, "character": 0}
+    position = _representative_position(ana)
     hover_result = hover(text, ana, {"position": position})
     current = {
         "diagnostics": [d.to_dict() for d in ana.diagnostics],

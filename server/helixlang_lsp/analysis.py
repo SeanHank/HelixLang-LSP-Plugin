@@ -24,7 +24,7 @@ CONFIG_TABLE_RE = re.compile(r"#config[^\n]*\btable=([A-Za-z0-9_]+)")
 ANNOTATION_KINDS = (
     "gene", "promoter", "regulate", "lsystem", "field", "config", "type",
     "crispr", "evolve", "methylate", "histone", "transcribe", "translate",
-    "quorum",
+    "quorum", "media", "enzyme", "metabolite", "sim",
 )
 BIO_INSTRUCTION_KINDS = {
     "crispr", "evolve", "methylate", "histone",
@@ -38,6 +38,10 @@ REQUIRED_FIELDS = {
     "field": (),
     "type": (),
     "regulate": (),
+    "media": ("nutrient", "concentration"),
+    "enzyme": ("gene", "reaction"),
+    "metabolite": ("name",),
+    "sim": (),
 }
 VALID_TABLE_NAMES = tuple(helix.TABLES.keys())
 

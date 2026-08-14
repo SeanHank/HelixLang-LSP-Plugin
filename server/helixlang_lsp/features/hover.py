@@ -45,6 +45,26 @@ ANNOTATION_DOCS: dict[str, str] = {
     "transcribe": "**#transcribe** — transcription instruction. Fields: `target=`.",
     "translate": "**#translate** — translation instruction. Fields: `target=`.",
     "quorum": "**#quorum** — quorum-sensing instruction. Fields: `target=`.",
+    "media": "**#media** — growth-medium declaration (repeatable).\n\n"
+              "Fields: `nutrient=` (required), `concentration=` (required), "
+              "`diffusion_um2_s=` (optional).\n"
+              "Sets the FBA uptake bound / environment field for the sim "
+              "backends; inert under `classic`.",
+    "enzyme": "**#enzyme** — gene→reaction binding for enzyme-constrained FBA "
+              "(repeatable).\n\n"
+              "Fields: `gene=` (required), `reaction=` (required), "
+              "`kcat=` (optional).\n"
+              "When `#config enzyme_capacity=true` and no `#enzyme` is given, "
+              "the default enzyme tables are used.",
+    "metabolite": "**#metabolite** — intracellular pool initialisation "
+                  "(repeatable).\n\n"
+                  "Fields: `name=` (required), `init=` (optional, default 0.0).\n"
+                  "Requires `#config metabolite_pools=true` to take effect; "
+                  "inert under `classic`.",
+    "sim": "**#sim** — open `key=value` extension point (repeatable).\n\n"
+           "Merges fields into `Program.sim_extensions` for long-tail "
+           "backends, e.g. `#sim kind=spatial_dfba`. "
+           "Inert until a backend registers it.",
     "end": "**#end** — terminates the current annotation block.",
     "dna": "**#dna** — a raw DNA body (codons outside annotations).",
 }
@@ -194,6 +214,37 @@ def _hover_field(ann: AnnotationInfo, f: Any) -> dict[str, Any]:
         body += "\n\nOne of `NHEJ`, `HDR`."
     elif f.key == "mark":
         body += "\n\nOne of `H3K4me3`, `H3K27me3`, `H3K36me3`, `H3K9me3`, `H3K27ac`."
+    elif f.key == "backend":
+        body += "\n\nOne of `classic`, `whole_cell`, `population`, `fba`, " \
+                "`calibration`, `benchmark` (default `classic`)."
+    elif f.key == "seed":
+        body += "\n\n`int | none` — RNG seed (adder noise, GRN/population " \
+                "noise, calibration). Same source + same seed ⇒ identical output."
+    elif f.key == "nutrient":
+        body += "\n\nMetabolite id (e.g. `GLC`, `O2`, `AC`)."
+    elif f.key == "concentration":
+        body += "\n\nMedium concentration (mM); sets the FBA uptake bound / " \
+                "environment field."
+    elif f.key == "diffusion_um2_s":
+        body += "\n\nFick diffusion coefficient (µm²/s); population field only."
+    elif f.key == "gene":
+        body += "\n\nGene symbol bound to the reaction (must match a `#gene` name)."
+    elif f.key == "reaction":
+        body += "\n\nReaction id in the model."
+    elif f.key == "kcat":
+        body += "\n\nEnzyme turnover (s⁻¹); overrides the default kcat table."
+    elif f.key == "init":
+        body += "\n\nInitial pool value."
+    elif f.key == "division_rule":
+        body += "\n\nOne of `energy`, `adder`."
+    elif f.key == "replication_mode":
+        body += "\n\nOne of `flat`, `cooper_helmstetter`."
+    elif f.key == "protein_maturation_mode":
+        body += "\n\nOne of `instant`, `chaperone`."
+    elif f.key == "mechanics":
+        body += "\n\nOne of `none`, `shoving`, `force`."
+    elif f.key == "fba_model":
+        body += "\n\n`core | <path>` — `ECOLI_CORE_MODEL` or an SBML/JSON model path."
     return Hover(contents=MarkupContent(value=body),
                  range=_line_range(f.line0)).to_dict()
 
