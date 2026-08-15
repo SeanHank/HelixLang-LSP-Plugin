@@ -175,7 +175,51 @@ def test_semantic_tokens_start_modifier():
     result = st.semantic_tokens(SAMPLE, _ana(), {})
     data = result["data"]
     token_types = [data[i + 3] for i in range(0, len(data), 5)]
-    assert 0 in token_types  # keyword (OP_START)
+    assert 9 in token_types  # opcodeStart (OP_START)
+    assert 10 in token_types  # opcodeHalt (OP_HALT)
+
+
+def test_semantic_tokens_codon_families():
+    """doc/08 §3.1: ATG=Start, GCT/GGT=Synthesis, GTA=Behavior, TAA=Halt."""
+    text = "#gene name=hello\nATG GCT GGT GTA TAA\n#end\n"
+    ana = analyze(text)
+    result = st.semantic_tokens(text, ana, {})
+    data = result["data"]
+    fam = {}
+    for i in range(0, len(data), 5):
+        length = data[i + 2]
+        if length == 3:
+            fam.setdefault(data[i + 3], 0)
+            fam[data[i + 3]] += 1
+    # opcodeStart, opcodeHalt, opcodeSynthesis, opcodeBehavior
+    assert 9 in fam and 10 in fam and 12 in fam and 13 in fam
+    assert fam[12] == 2  # GCT + GGT share the synthesis family
+
+
+def test_semantic_tokens_family_across_tables():
+    """doc/08 §3.1: table switches change the decoded opcode/family."""
+    text = "#gene name=g\nATA AGA AGG TGA\n#end\n"
+    standard = analyze(text)  # default standard table
+    mito = analyze(text, table_hint="mito_vertebrate")
+
+    def families(ana) -> set[int]:
+        data = st.semantic_tokens(text, ana, {})["data"]
+        return {data[i + 3] for i in range(0, len(data), 5) if data[i + 2] == 3}
+
+    std_fam, mito_fam = families(standard), families(mito)
+    assert 16 in std_fam  # standard: AGA/AGG -> OP_CALL_GENE -> opcodeCall
+    assert 9 in mito_fam  # mito: ATA -> OP_START -> opcodeStart
+    assert 10 in mito_fam  # mito: AGA/AGG -> OP_HALT -> opcodeHalt
+    assert std_fam != mito_fam
+
+
+def test_semantic_tokens_bad_dna_degrades_gracefully():
+    """Non-DNA characters are a LexError: no tokens, empty data, no crash."""
+    text = "#gene name=g\nATG XYZ TAA\n#end\n"
+    ana = analyze(text)
+    assert len(ana.diagnostics) == 1
+    data = st.semantic_tokens(text, ana, {})["data"]
+    assert data == []
 
 
 def test_formatting_groups_codons():

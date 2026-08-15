@@ -27,6 +27,8 @@ class HelixSettings : PersistentStateComponent<HelixSettings.State> {
         @OptionTag("debounceMs") var debounceMs: Int = 200,
         @OptionTag("validateRunVm") var validateRunVm: Boolean = false,
         @OptionTag("lspDebug") var lspDebug: Boolean = false,
+        @OptionTag("codonColorCustom") var codonColorCustom: Boolean = false,
+        var codonColorOverrides: Map<String, String> = emptyMap(),
     )
 
     @Volatile
@@ -110,6 +112,20 @@ class HelixSettings : PersistentStateComponent<HelixSettings.State> {
         get() = currentState.lspDebug
         set(value) {
             currentState.lspDebug = value
+        }
+
+    /** Whether user-defined codon colors override the IDE Color Scheme (doc/08 §3.5). */
+    var codonColorCustom: Boolean
+        get() = currentState.codonColorCustom
+        set(value) {
+            currentState.codonColorCustom = value
+        }
+
+    /** Per-family override colors: `CodonFamily.id -> "#RRGGBB"` (doc/08 §3.5). */
+    var codonColorOverrides: Map<String, String>
+        get() = currentState.codonColorOverrides
+        set(value) {
+            currentState.codonColorOverrides = value
         }
 
     companion object {

@@ -1,0 +1,101 @@
+<scheme name="Default" parent_scheme="Default" version="142">
+    <attributes>
+        <option name="HELIX_CODON_START">
+            <value>
+                <option name="FOREGROUND" value="007F00"/>
+                <option name="FONT_TYPE" value="1"/>
+            </value>
+        </option>
+        <option name="HELIX_CODON_HALT">
+            <value>
+                <option name="FOREGROUND" value="B00000"/>
+            </value>
+        </option>
+        <option name="HELIX_CODON_STACK">
+            <value>
+                <option name="FOREGROUND" value="7B5E9B"/>
+            </value>
+        </option>
+        <option name="HELIX_CODON_SYNTHESIS">
+            <value>
+                <option name="FOREGROUND" value="0000B8"/>
+            </value>
+        </option>
+        <option name="HELIX_CODON_BEHAVIOR">
+            <value>
+                <option name="FOREGROUND" value="A05000"/>
+            </value>
+        </option>
+        <option name="HELIX_CODON_MORPHOLOGY">
+            <value>
+                <option name="FOREGROUND" value="007070"/>
+            </value>
+        </option>
+        <option name="HELIX_CODON_REGULATION">
+            <value>
+                <option name="FOREGROUND" value="A0008A"/>
+            </value>
+        </option>
+        <option name="HELIX_CODON_CALL">
+            <value>
+                <option name="FOREGROUND" value="00578A"/>
+            </value>
+        </option>
+        <option name="HELIX_CODON_ARITHMETIC">
+            <value>
+                <option name="FOREGROUND" value="806000"/>
+            </value>
+        </option>
+    </attributes>
+</scheme>
+
+<scheme name="Darcula" parent_scheme="Darcula" version="142">
+    <attributes>
+        <option name="HELIX_CODON_START">
+            <value>
+                <option name="FOREGROUND" value="6A8759"/>
+                <option name="FONT_TYPE" value="1"/>
+            </value>
+        </option>
+        <option name="HELIX_CODON_HALT">
+            <value>
+                <option name="FOREGROUND" value="FF6B68"/>
+            </value>
+        </option>
+        <option name="HELIX_CODON_STACK">
+            <value>
+                <option name="FOREGROUND" value="9876AA"/>
+            </value>
+        </option>
+        <option name="HELIX_CODON_SYNTHESIS">
+            <value>
+                <option name="FOREGROUND" value="5B8DD6"/>
+            </value>
+        </option>
+        <option name="HELIX_CODON_BEHAVIOR">
+            <value>
+                <option name="FOREGROUND" value="CC7832"/>
+            </value>
+        </option>
+        <option name="HELIX_CODON_MORPHOLOGY">
+            <value>
+                <option name="FOREGROUND" value="45A3A3"/>
+            </value>
+        </option>
+        <option name="HELIX_CODON_REGULATION">
+            <value>
+                <option name="FOREGROUND" value="C467E0"/>
+            </value>
+        </option>
+        <option name="HELIX_CODON_CALL">
+            <value>
+                <option name="FOREGROUND" value="6897BB"/>
+            </value>
+        </option>
+        <option name="HELIX_CODON_ARITHMETIC">
+            <value>
+                <option name="FOREGROUND" value="BBB529"/>
+            </value>
+        </option>
+    </attributes>
+</scheme>

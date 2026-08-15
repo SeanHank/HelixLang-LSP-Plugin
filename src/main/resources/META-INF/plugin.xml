@@ -22,6 +22,10 @@
               implementationClass="com.helixlang.plugin.psi.HelixParserDefinition"/>
     <lang.syntaxHighlighterFactory language="Helix"
               implementationClass="com.helixlang.plugin.syntax.HelixSyntaxHighlighterFactory"/>
+    <additionalTextAttributes scheme="Default"
+              file="colorSchemes/HelixLangDefault.xml"/>
+    <colorSettingsPage id="HelixLangColors"
+              implementation="com.helixlang.plugin.syntax.HelixColorSettingsPage"/>
     <lang.braceMatcher language="Helix"
               implementationClass="com.helixlang.plugin.syntax.HelixBraceMatcher"/>
     <lang.commenter language="Helix"

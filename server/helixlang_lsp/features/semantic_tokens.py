@@ -1,9 +1,9 @@
 """``textDocument/semanticTokens/full`` — token classification.
 
-Legend (doc/03 §9): keyword, type, function, variable, number, string,
-comment, operator, arrow; modifiers: declaration, defaultLibrary. Codons are
-classified by their decoded opcode family. Output uses LSP relative delta
-encoding.
+Legend (doc/03 §9 + doc/08 §3.2): keyword, type, function, variable, number,
+string, comment, operator, arrow, and the nine ``opcode*`` codon families;
+modifiers: declaration, defaultLibrary. Codons are classified by the family of
+their decoded opcode (doc/08 §3.1). Output uses LSP relative delta encoding.
 """
 
 from __future__ import annotations
@@ -12,7 +12,7 @@ from typing import Any
 
 from helixlang_lsp import _helix_contract as helix
 from helixlang_lsp.analysis import Analysis
-from helixlang_lsp.codons import decode_codon
+from helixlang_lsp.codons import decode_codon, opcode_family
 from helixlang_lsp.protocol import TOKEN_MODIFIER_INDEX, TOKEN_TYPE_INDEX, SemanticTokens
 
 _NUM_FIELDS = {
@@ -33,24 +33,6 @@ _NUM_FIELDS = {
     "dfba_initial_biomass_gdw", "dfba_glucose_half_saturation_mm",
     "dfba_oxygen_max_uptake", "dfba_oxygen_half_saturation_mm",
     "fba_dt_h", "fba_glucose_mm", "fba_oxygen_max", "fba_steps",
-}
-
-_BUILD_OPS = {
-    int(helix.Op.OP_BUILD_PROTEIN), int(helix.Op.OP_BUILD_MEMBRANE),
-    int(helix.Op.OP_BUILD_PIGMENT),
-}
-_BEHAVIOR_OPS = {
-    int(helix.Op.OP_MOVE), int(helix.Op.OP_SIGNAL), int(helix.Op.OP_DIVIDE),
-    int(helix.Op.OP_DIE), int(helix.Op.OP_FEED),
-}
-_OPERATOR_OPS = {
-    int(helix.Op.OP_GROW_LSYSTEM), int(helix.Op.OP_DIFFUSE),
-    int(helix.Op.OP_REACT), int(helix.Op.OP_EMIT_MORPHOGEN),
-    int(helix.Op.OP_READ_MEM), int(helix.Op.OP_WRITE_MEM),
-    int(helix.Op.OP_MODIFY_STATE), int(helix.Op.OP_REGULATE),
-    int(helix.Op.OP_BIND), int(helix.Op.OP_CALL_GENE),
-    int(helix.Op.OP_ADD), int(helix.Op.OP_SUB), int(helix.Op.OP_MUL),
-    int(helix.Op.OP_LT), int(helix.Op.OP_NOT),
 }
 
 
@@ -118,20 +100,14 @@ def _classify_codon(abs_tokens: list[tuple[int, int, int, int, int]],
         _add(abs_tokens, line, col, 3, "string", 0)
         return
     op, _w = decoded
-    op_int = int(op)
     if op is helix.Op.OP_START:
-        _add(abs_tokens, line, col, 3, "keyword",
+        _add(abs_tokens, line, col, 3, "opcodeStart",
              TOKEN_MODIFIER_INDEX["defaultLibrary"])
     elif op is helix.Op.OP_HALT:
-        _add(abs_tokens, line, col, 3, "keyword", 0)
-    elif op_int in _BUILD_OPS:
-        _add(abs_tokens, line, col, 3, "function", 0)
-    elif op_int in _BEHAVIOR_OPS:
-        _add(abs_tokens, line, col, 3, "variable", 0)
-    elif op_int in _OPERATOR_OPS:
-        _add(abs_tokens, line, col, 3, "operator", 0)
+        _add(abs_tokens, line, col, 3, "opcodeHalt", 0)
     else:
-        _add(abs_tokens, line, col, 3, "operator", 0)
+        _add(abs_tokens, line, col, 3,
+             opcode_family(op) or "opcodeArithmetic", 0)
 
 
 def _add(abs_tokens: list[tuple[int, int, int, int, int]], line: int, col: int,

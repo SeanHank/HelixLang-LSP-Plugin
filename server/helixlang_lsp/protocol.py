@@ -245,7 +245,12 @@ class FoldingRange:
 # ---------- Semantic tokens ----------
 
 TOKEN_TYPES = ["keyword", "type", "function", "variable", "number", "string",
-               "comment", "operator", "arrow"]
+               "comment", "operator", "arrow",
+               # codon opcode families (doc/08 §3.2); appended so existing
+               # indices stay stable across plugin versions
+               "opcodeStart", "opcodeHalt", "opcodeStack", "opcodeSynthesis",
+               "opcodeBehavior", "opcodeMorphology", "opcodeRegulation",
+               "opcodeCall", "opcodeArithmetic"]
 TOKEN_MODIFIERS = ["declaration", "defaultLibrary"]
 
 TOKEN_TYPE_INDEX = {name: i for i, name in enumerate(TOKEN_TYPES)}

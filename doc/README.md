@@ -22,6 +22,7 @@ implementation; when a document and the code disagree, the code prevails.
 | [05](./05-features.md) | Feature owners & QA | Feature-by-feature specification, triggers, edge cases, priority matrix |
 | [06](./06-build-testing.md) | Build & CI maintainers | Gradle/Python build, quality gates, test pyramid, distribution |
 | [07](./07-roadmap.md) | Maintainers | Milestones, acceptance criteria, risks, future work |
+| [08](./08-codon-colors-and-settings-ui.md) | Feature owners, plugin contributors | Configurable per-opcode codon coloring (editor + settings) and the settings-page UI redesign |
 
 ## Suggested reading order
 
@@ -32,6 +33,7 @@ implementation; when a document and the code disagree, the code prevails.
 5. **[05-features.md](./05-features.md)** — the user-facing feature contract.
 6. **[06-build-testing.md](./06-build-testing.md)** — before you open a PR.
 7. **[07-roadmap.md](./07-roadmap.md)** — where the project is going.
+8. **[08-codon-colors-and-settings-ui.md](./08-codon-colors-and-settings-ui.md)** — codon coloring by opcode + the settings-page redesign.
 
 ## Upstream references
 

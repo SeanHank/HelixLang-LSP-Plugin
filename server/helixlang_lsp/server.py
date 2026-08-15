@@ -46,6 +46,7 @@ from helixlang_lsp.features import (
     semantic_tokens as semantic_tokens_mod,
 )
 from helixlang_lsp.protocol import (
+    TOKEN_TYPES,
     CompletionList,
     Diagnostic,
     Location,
@@ -84,8 +85,7 @@ _CAPABILITIES = {
     },
     "semanticTokensProvider": {
         "legend": {
-            "tokenTypes": ["keyword", "type", "function", "variable", "number",
-                           "string", "comment", "operator", "arrow"],
+            "tokenTypes": list(TOKEN_TYPES),
             "tokenModifiers": ["declaration", "defaultLibrary"],
         },
         "range": False,

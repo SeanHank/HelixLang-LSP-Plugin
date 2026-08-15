@@ -5,10 +5,8 @@ import com.intellij.openapi.options.SettingsEditor
 import com.intellij.openapi.ui.TextFieldWithBrowseButton
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.components.JBTextField
-import java.awt.BorderLayout
 import javax.swing.JComboBox
 import javax.swing.JComponent
-import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JCheckBox
 
@@ -26,24 +24,15 @@ class HelixRunSettingsEditor : SettingsEditor<HelixRunConfiguration>() {
     private val panel: JPanel = buildPanel()
 
     private fun buildPanel(): JPanel {
-        val panel = JPanel(BorderLayout())
-        val grid = com.intellij.ui.components.panels.VerticalBox()
-        grid.add(row("Interpreter:", interpreter))
-        grid.add(row("Script:", script))
-        grid.add(row("Translation table:", table))
-        grid.add(row("Backend:", backend))
-        grid.add(row("Ticks override:", ticks))
-        grid.add(row("Output format:", output))
-        grid.add(disassemble)
-        panel.add(grid, BorderLayout.NORTH)
-        return panel
-    }
-
-    private fun row(label: String, component: JComponent): JPanel {
-        val row = JPanel(BorderLayout())
-        row.add(JLabel(label), BorderLayout.WEST)
-        row.add(component, BorderLayout.CENTER)
-        return row
+        val builder = com.intellij.util.ui.FormBuilder.createFormBuilder()
+        builder.addLabeledComponent("Interpreter:", interpreter)
+        builder.addLabeledComponent("Script:", script)
+        builder.addLabeledComponent("Translation table:", table)
+        builder.addLabeledComponent("Backend:", backend)
+        builder.addLabeledComponent("Ticks override:", ticks)
+        builder.addLabeledComponent("Output format:", output)
+        builder.addComponent(disassemble)
+        return builder.getPanel()
     }
 
     override fun resetEditorFrom(configuration: HelixRunConfiguration) {
