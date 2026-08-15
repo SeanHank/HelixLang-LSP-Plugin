@@ -171,12 +171,7 @@ class HelixSettingsConfigurable : SearchableConfigurable {
 
         // ── Codon colors ──
         val colors = FormBuilder.createFormBuilder()
-        colors.addComponent(HorizontalBox().apply {
-            add(codonColorCustom)
-            add(javax.swing.Box.createHorizontalStrut(JBUI.scale(8)))
-            add(resetAllColors)
-        })
-        colors.addComponent(buildColorTable())
+        colors.addComponent(buildCodonColorsGrid())
         colors.addLabeledComponent("Preview:", codonPreview)
         root.add(section("Codon colors", colors.getPanel()))
 
@@ -227,36 +222,55 @@ class HelixSettingsConfigurable : SearchableConfigurable {
     }
 
     /**
-     * Three aligned columns, one row per family:
+     * Codon-colors area as one grid: the `Custom codon colors` checkbox and
+     * `Reset all` in a two-column header (aligned with the label / picker
+     * columns), then one aligned row per family:
      * `Start (ATG)  [FFFFFF]  [Reset]`
      */
-    private fun buildColorTable(): JComponent {
+    private fun buildCodonColorsGrid(): JComponent {
         val grid = JPanel(GridBagLayout())
         grid.isOpaque = false
         val pickerWidth = JBUI.scale(120)
         val resetWidth = JBUI.scale(80)
-        CodonColorKeys.families.forEachIndexed { index, family ->
+
+        var y = 0
+        val headerLabel = GridBagConstraints()
+        headerLabel.gridy = y
+        headerLabel.gridx = 0
+        headerLabel.anchor = GridBagConstraints.WEST
+        headerLabel.insets = JBUI.insets(0, 0, JBUI.scale(4), JBUI.scale(12))
+        grid.add(codonColorCustom, headerLabel)
+
+        val headerReset = GridBagConstraints()
+        headerReset.gridy = y
+        headerReset.gridx = 1
+        headerReset.anchor = GridBagConstraints.WEST
+        headerReset.insets = JBUI.insets(0, 0, JBUI.scale(4), JBUI.scale(12))
+        grid.add(resetAllColors, headerReset)
+
+        for (family in CodonColorKeys.families) {
+            y++
             val row = colorRows.getValue(family)
             val label = JLabel(family.label)
             row.picker.preferredSize = Dimension(pickerWidth, row.picker.preferredSize.height)
             row.reset.preferredSize = Dimension(resetWidth, row.reset.preferredSize.height)
 
             val labelConstraints = GridBagConstraints()
-            labelConstraints.gridy = index
+            labelConstraints.gridy = y
             labelConstraints.gridx = 0
             labelConstraints.anchor = GridBagConstraints.WEST
             labelConstraints.insets = JBUI.insets(0, 0, JBUI.scale(4), JBUI.scale(12))
             grid.add(label, labelConstraints)
 
             val pickerConstraints = GridBagConstraints()
-            pickerConstraints.gridy = index
+            pickerConstraints.gridy = y
             pickerConstraints.gridx = 1
             pickerConstraints.anchor = GridBagConstraints.WEST
             pickerConstraints.insets = JBUI.insets(0, 0, JBUI.scale(4), JBUI.scale(12))
             grid.add(row.picker, pickerConstraints)
 
             val resetConstraints = GridBagConstraints()
-            resetConstraints.gridy = index
+            resetConstraints.gridy = y
             resetConstraints.gridx = 2
             resetConstraints.anchor = GridBagConstraints.WEST
             resetConstraints.insets = JBUI.insets(0, 0, JBUI.scale(4), 0)
@@ -282,21 +296,14 @@ class HelixSettingsConfigurable : SearchableConfigurable {
     }
 
     private fun refreshPicker(family: CodonFamily, row: ColorRow) {
-        val override = pendingColorOverrides[family.id]
-        val color = CodonColorKeys.parseHexColor(override) ?: schemeColor(family)
-        row.picker.background = color ?: Color(180, 180, 180)
+        val color = CodonColorKeys.parseHexColor(pendingColorOverrides[family.id]) ?: schemeColor(family)
         row.picker.text = color?.let(::toHex) ?: "N/A"
-        row.picker.foreground = color?.let { readableForeground(it) } ?: Color.BLACK
+        row.picker.foreground = color ?: Color.BLACK
         row.picker.toolTipText = color?.let(::toHex) ?: "Using IDE Color Scheme"
     }
 
     private fun toHex(color: Color): String =
         "%02X%02X%02X".format(color.red, color.green, color.blue)
-
-    private fun readableForeground(color: Color): Color {
-        val luminance = (0.299 * color.red + 0.587 * color.green + 0.114 * color.blue) / 255.0
-        return if (luminance > 0.5) Color(0, 0, 0) else Color(255, 255, 255)
-    }
 
     private fun refreshPreview() {
         val html = buildString {
@@ -340,8 +347,11 @@ class HelixSettingsConfigurable : SearchableConfigurable {
         val reset: JButton = JButton("Reset")
 
         init {
-            picker.isOpaque = true
+            picker.isOpaque = false
+            picker.isContentAreaFilled = false
             picker.isBorderPainted = true
+            picker.isFocusPainted = false
+            picker.isRolloverEnabled = false
             picker.toolTipText = "Click to pick a color"
             picker.addActionListener {
                 val current = CodonColorKeys.parseHexColor(pendingColorOverrides[family.id])
