@@ -65,6 +65,18 @@ ANNOTATION_DOCS: dict[str, str] = {
            "Merges fields into `Program.sim_extensions` for long-tail "
            "backends, e.g. `#sim kind=spatial_dfba`. "
            "Inert until a backend registers it.",
+    "genome": "**#genome** — genome-scale backend switch "
+              "(doc/18 §13 Design 5).\n\n"
+              "Sets `genome=true`; fields merge into `Program.sim_extensions` "
+              "under a `genome_` prefix (same extension point as `#sim`).\n"
+              "Fields: `source=` (`ecoli-mg1655` | `synth-4300` | path), "
+              "`tf_map=` (`regulon` | `random` | `off`), "
+              "`grn_mode=` (`sparse` | `full`), `active_gene_budget=` "
+              "(default 512), `seed=` (default 7).\n"
+              "Inert under the `classic` backend.",
+    "morphogen": "**#morphogen** — morphogen→gene feedback wiring.\n\n"
+                 "Fields: `gene=` (required), `channel=` (`U` | `V`, "
+                 "default `V`), `gain=` (float, default 0.1).",
     "end": "**#end** — terminates the current annotation block.",
     "dna": "**#dna** — a raw DNA body (codons outside annotations).",
 }
@@ -245,6 +257,16 @@ def _hover_field(ann: AnnotationInfo, f: Any) -> dict[str, Any]:
         body += "\n\nOne of `none`, `shoving`, `force`."
     elif f.key == "fba_model":
         body += "\n\n`core | <path>` — `ECOLI_CORE_MODEL` or an SBML/JSON model path."
+    elif f.key == "channel":
+        body += "\n\nOne of `U`, `V`."
+    elif f.key == "source":
+        body += "\n\n`ecoli-mg1655` | `synth-4300` | a genome file/model path."
+    elif f.key == "tf_map":
+        body += "\n\nOne of `regulon`, `random`, `off`."
+    elif f.key == "grn_mode":
+        body += "\n\nOne of `sparse`, `full`."
+    elif f.key == "active_gene_budget":
+        body += "\n\nPer-cell per-tick active-gene budget (default 512)."
     return Hover(contents=MarkupContent(value=body),
                  range=_line_range(f.line0)).to_dict()
 

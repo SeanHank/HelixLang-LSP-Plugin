@@ -53,7 +53,7 @@ crash recovers within 10 s; golden tests green.
 - Inlay hints (P0), quick-fixes, formatting (P1), DAP debugger (P1).
 - Performance budgets, manual checklist, marketplace packaging.
 
-**Exit criteria:** `v2026.8.1` published to JetBrains Marketplace; release blog.
+**Exit criteria:** `v2026.8.2` published to JetBrains Marketplace; release blog.
 
 ### M5 — Hardening (ongoing)
 

@@ -1,6 +1,6 @@
 [project]
 name = "helixlang-lsp"
-version = "2026.8.1"
+version = "2026.8.2"
 description = "Language Server Protocol server for the HelixLang DSL (.helix)"
 requires-python = ">=3.11"
 dependencies = ["helixlang>=1.0.0"]

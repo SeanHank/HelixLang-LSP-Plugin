@@ -1,0 +1,19 @@
+{
+  "diagnostics": [],
+  "hover": {
+    "contents": {
+      "kind": "markdown",
+      "value": "  \n**#media** — growth-medium declaration (repeatable).\n\nFields: `nutrient=` (required), `concentration=` (required), `diffusion_um2_s=` (optional).\nSets the FBA uptake bound / environment field for the sim backends; inert under `classic`."
+    },
+    "range": {
+      "start": {
+        "line": 8,
+        "character": 0
+      },
+      "end": {
+        "line": 8,
+        "character": 0
+      }
+    }
+  }
+}

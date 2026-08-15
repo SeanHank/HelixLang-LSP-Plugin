@@ -1,0 +1,19 @@
+{
+  "diagnostics": [],
+  "hover": {
+    "contents": {
+      "kind": "markdown",
+      "value": "  \n**#sim** — open `key=value` extension point (repeatable).\n\nMerges fields into `Program.sim_extensions` for long-tail backends, e.g. `#sim kind=spatial_dfba`. Inert until a backend registers it."
+    },
+    "range": {
+      "start": {
+        "line": 18,
+        "character": 0
+      },
+      "end": {
+        "line": 18,
+        "character": 0
+      }
+    }
+  }
+}

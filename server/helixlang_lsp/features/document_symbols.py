@@ -32,6 +32,8 @@ _KIND_MAP: dict[str, int] = {
     "enzyme": SymbolKind["class"],
     "metabolite": SymbolKind["class"],
     "sim": SymbolKind["event"],
+    "genome": SymbolKind["constant"],
+    "morphogen": SymbolKind["field"],
     "dna": SymbolKind["module"],
 }
 
@@ -78,6 +80,12 @@ def _symbol_name(ann: Any) -> str:
     if ann.kind == "sim":
         kind = next((f.value for f in ann.fields if f.key == "kind"), "")
         return f"Sim kind={kind}" if kind else "Sim"
+    if ann.kind == "genome":
+        src = next((f.value for f in ann.fields if f.key == "source"), "")
+        return f"Genome source={src}" if src else "Genome"
+    if ann.kind == "morphogen":
+        gene = next((f.value for f in ann.fields if f.key == "gene"), "")
+        return f"Morphogen gene={gene}" if gene else "Morphogen"
     for f in ann.fields:
         if f.key == "name":
             return f.value

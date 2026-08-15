@@ -86,6 +86,7 @@ def test_completion_after_hash():
     result = comp.completions(text, ana, {"position": {"line": 6, "character": 1}})
     labels = [i["label"] for i in result["items"]]
     assert "gene" in labels and "promoter" in labels
+    assert "genome" in labels and "morphogen" in labels
 
 
 def test_completion_field_names():
@@ -116,6 +117,43 @@ def test_completion_codons_in_body():
                               {"position": {"line": 3, "character": 5}})
     labels = [i["label"] for i in result["items"]]
     assert "ATG" in labels and "TAA" in labels
+
+
+def test_completion_genome_fields():
+    text = SAMPLE + "#genome s\n"
+    ana = analyze(text)
+    result = comp.completions(text, ana, {"position": {"line": 6, "character": 9}})
+    labels = [i["label"] for i in result["items"]]
+    for key in ("source", "tf_map", "grn_mode", "active_gene_budget", "seed"):
+        assert key in labels
+
+
+def test_completion_genome_source_enum():
+    # #genome source= -> genome sources, not gene symbols
+    text = SAMPLE + "#genome source=\n"
+    ana = analyze(text)
+    result = comp.completions(text, ana, {"position": {"line": 6, "character": 16}})
+    labels = [i["label"] for i in result["items"]]
+    assert "ecoli-mg1655" in labels and "synth-4300" in labels
+    assert "lacZ" not in labels
+
+
+def test_completion_sim_kind_long_tail():
+    text = SAMPLE + "#sim kind=\n"
+    ana = analyze(text)
+    result = comp.completions(text, ana, {"position": {"line": 6, "character": 11}})
+    labels = [i["label"] for i in result["items"]]
+    for kind in ("spatial_dfba", "spatial_evolution", "consortium",
+                 "population_calibration", "codon_usage", "cello_workflow"):
+        assert kind in labels
+
+
+def test_hover_genome_annotation():
+    text = SAMPLE + "#genome source=synth-4300\n"
+    ana = analyze(text)
+    result = hover.hover(text, ana, {"position": {"line": 6, "character": 1}})
+    assert result is not None
+    assert "**#genome**" in result["contents"]["value"]
 
 
 def test_definition_promoter_reference():
@@ -157,6 +195,14 @@ def test_document_symbols():
     assert kinds["lacZ"] == 12  # function
     assert kinds["p_lac"] == 13  # variable
     assert kinds["p_lac -> lacZ"] == 25  # operator
+
+
+def test_document_symbols_genome():
+    text = SAMPLE + "#genome source=synth-4300\n"
+    ana = analyze(text)
+    result = ds.document_symbols(text, ana, {})
+    names = [s["name"] for s in result]
+    assert "Genome source=synth-4300" in names
 
 
 def test_folding_ranges():

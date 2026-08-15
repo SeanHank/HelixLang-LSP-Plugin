@@ -70,13 +70,16 @@ FIELD_SETS: dict[str, list[str]] = {
     "enzyme": ["gene", "reaction", "kcat"],
     "metabolite": ["name", "init"],
     "sim": ["kind"],
+    "genome": ["source", "tf_map", "grn_mode", "active_gene_budget", "seed"],
+    "morphogen": ["gene", "channel", "gain"],
 }
 
 LONG_TAIL_KINDS = [
     "3d_morphology", "codec_benchmark", "codon_usage", "cello_workflow",
     "consortium", "digital_evolution", "directed_evolution", "fate_analysis",
-    "morphogen_gradient", "omics_calibration", "protein_fitness",
-    "protein_structure", "spatial_dfba", "stochastic", "synbio_design",
+    "morphogen_gradient", "omics_calibration", "population_calibration",
+    "protein_fitness", "protein_structure", "spatial_dfba",
+    "spatial_evolution", "stochastic", "synbio_design",
 ]
 
 FIELD_DOCS: dict[str, str] = {
@@ -108,6 +111,12 @@ FIELD_DOCS: dict[str, str] = {
     "reaction": "Reaction id in the model.",
     "kcat": "Enzyme turnover (s⁻¹).",
     "kind": "Long-tail #sim backend selector.",
+    "source": "Genome source: `ecoli-mg1655` | `synth-4300` | model path.",
+    "tf_map": "regulon | random | off — transcription-factor map.",
+    "grn_mode": "sparse | full — GRN topology.",
+    "active_gene_budget": "Per-cell per-tick active-gene budget (default 512).",
+    "channel": "U | V — morphogen channel.",
+    "gain": "Feedback gain (float, default 0.1).",
     "backend": "classic | whole_cell | population | fba | calibration | benchmark",
     "seed": "int | none: RNG seed for determinism.",
     "division_rule": "energy | adder",
@@ -199,6 +208,10 @@ ENUM_VALUES: dict[str, list[str]] = {
     "dfba": ["true", "false"],
     "dynfba": ["true", "false"],
     "kind": LONG_TAIL_KINDS,
+    "source": ["ecoli-mg1655", "synth-4300"],
+    "tf_map": ["regulon", "random", "off"],
+    "grn_mode": ["sparse", "full"],
+    "channel": ["U", "V"],
 }
 
 TYPE_VALUES = ["Protein", "Signal", "Float", "Int", "Bool", "String",
@@ -207,7 +220,8 @@ TYPE_VALUES = ["Protein", "Signal", "Float", "Int", "Bool", "String",
 ANNOTATION_KINDS = ["gene", "promoter", "regulate", "lsystem", "field",
                     "config", "type", "crispr", "evolve", "methylate",
                     "histone", "transcribe", "translate", "quorum",
-                    "media", "enzyme", "metabolite", "sim"]
+                    "media", "enzyme", "metabolite", "sim", "genome",
+                    "morphogen"]
 
 _BIO_KINDS = {"crispr", "evolve", "methylate", "histone", "transcribe",
               "translate", "quorum"}
@@ -288,7 +302,8 @@ def _items_for_context(ctx: dict[str, Any],
                 for f in FIELD_SETS.get(ctx.get("ann_kind", ""), [])]
     if kind == "field_value":
         field = ctx.get("field", "")
-        if field in ("promoter", "call_target", "target", "source", "gene"):
+        if field in ("promoter", "call_target", "target", "gene") or \
+                (field == "source" and ctx.get("ann_kind") != "genome"):
             role = "promoter" if field == "promoter" else "target"
             items = [_symbol_item(n, s, n)
                      for n, s in analysis.structure.symbols.items()
