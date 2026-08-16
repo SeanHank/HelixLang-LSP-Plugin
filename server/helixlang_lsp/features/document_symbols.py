@@ -34,6 +34,8 @@ _KIND_MAP: dict[str, int] = {
     "sim": SymbolKind["event"],
     "genome": SymbolKind["constant"],
     "morphogen": SymbolKind["field"],
+    "species": SymbolKind["class"],
+    "patch": SymbolKind["class"],
     "dna": SymbolKind["module"],
 }
 
@@ -67,6 +69,10 @@ def document_symbols(text: str, analysis: Analysis,
     return [s.to_dict() for s in out]
 
 
+def _name_field(ann: Any) -> str:
+    return next((f.value for f in ann.fields if f.key == "name"), "")
+
+
 def _symbol_name(ann: Any) -> str:
     if ann.kind == "media":
         nut = next((f.value for f in ann.fields if f.key == "nutrient"), "")
@@ -86,6 +92,13 @@ def _symbol_name(ann: Any) -> str:
     if ann.kind == "morphogen":
         gene = next((f.value for f in ann.fields if f.key == "gene"), "")
         return f"Morphogen gene={gene}" if gene else "Morphogen"
+    if ann.kind == "species":
+        genome = next((f.value for f in ann.fields if f.key == "genome"), "")
+        return f"Species {_name_field(ann)}" \
+            + (f" genome={genome}" if genome else "")
+    if ann.kind == "patch":
+        kind = next((f.value for f in ann.fields if f.key == "kind"), "")
+        return f"Patch {_name_field(ann)}" + (f" kind={kind}" if kind else "")
     for f in ann.fields:
         if f.key == "name":
             return f.value

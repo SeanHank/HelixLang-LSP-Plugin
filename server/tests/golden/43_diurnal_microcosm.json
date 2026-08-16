@@ -1,0 +1,19 @@
+{
+  "diagnostics": [],
+  "hover": {
+    "contents": {
+      "kind": "markdown",
+      "value": "  \n**#species** — a species in the ecosystem backend (doc/19 §5.3 A2).\n\nFields (after `name=`): `genome=` (or a DNA code block, not both), `photo=`, `photo_vmax=`, `cn_ratio=`, `maintenance=`, `substrate=`/`vmax=`/`ks=` (+ `substrate2`/`vmax2`/`ks2`), dotted `consumption.<sub>.vmax/.ks`, `secretion=<sub>:<rate>`, `diet=<prey>:<eff>`, `attack=<prey>:<rate>`.\nNamespaced into `Program.sim_extensions` under `species.<name>.`; consumed by `#sim kind=ecosystem`."
+    },
+    "range": {
+      "start": {
+        "line": 10,
+        "character": 0
+      },
+      "end": {
+        "line": 10,
+        "character": 0
+      }
+    }
+  }
+}

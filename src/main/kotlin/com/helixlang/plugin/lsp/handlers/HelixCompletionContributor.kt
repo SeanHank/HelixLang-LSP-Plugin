@@ -88,7 +88,7 @@ class HelixCompletionContributor : CompletionContributor(), DumbAware {
             "gene", "promoter", "regulate", "lsystem", "field", "config", "type",
             "crispr", "evolve", "methylate", "histone", "transcribe", "translate",
             "quorum", "media", "enzyme", "metabolite", "sim", "genome",
-            "morphogen", "end")
+            "morphogen", "species", "patch", "end")
 
         private val FIELD_NAMES = listOf(
             "name", "promoter", "call_target", "strength", "target", "axiom",
@@ -97,7 +97,17 @@ class HelixCompletionContributor : CompletionContributor(), DumbAware {
             "kcat", "init", "backend", "seed", "division_rule",
             "replication_mode", "protein_maturation_mode", "mechanics", "kind",
             "source", "tf_map", "grn_mode", "active_gene_budget", "channel",
-            "gain")
+            "gain", "replicon", "replicons", "photo", "photo_vmax", "cn_ratio",
+            "maintenance", "substrate", "vmax", "ks", "substrate2", "vmax2",
+            "ks2", "secretion", "diet", "attack", "width", "height",
+            "carrying_capacity", "anoxic", "moisture", "clay", "cn_som",
+            "cn_species", "initial_nh4_mm", "initial_no3_mm", "flow_rate",
+            "fluctuation_period", "fluctuation_amplitude", "dispersal",
+            "fast_forward", "scheduler_max_step", "community_fba",
+            "sample_every", "generations", "evaluation_ticks",
+            "evolution_enabled", "stress_field", "stress_level", "n_rounds",
+            "substrate_mm", "target_protein", "mutation_rate", "bias_fraction",
+            "n_candidates")
 
         private val STATIC_ITEMS: List<LookupElement> =
             ANNOTATION_KINDS.map { kind ->

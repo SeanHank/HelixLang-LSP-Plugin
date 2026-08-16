@@ -1,0 +1,19 @@
+{
+  "diagnostics": [],
+  "hover": {
+    "contents": {
+      "kind": "markdown",
+      "value": "  \n**#config** — runtime configuration.\n\nFields: `table=` (standard | mito_vertebrate | ciliate), `ticks=`, `output=` (stdout | csv | png | none), `ops_per_tick=`, `react_steps=`, `use_central_dogma=`, `species=` (ecoli | yeast | human), `units=` (gameplay | real)."
+    },
+    "range": {
+      "start": {
+        "line": 17,
+        "character": 0
+      },
+      "end": {
+        "line": 17,
+        "character": 0
+      }
+    }
+  }
+}

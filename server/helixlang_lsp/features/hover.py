@@ -17,7 +17,8 @@ from helixlang_lsp.protocol import Hover, MarkupContent, Position
 ANNOTATION_DOCS: dict[str, str] = {
     "gene": "**#gene** — a functional unit of DNA.\n\n"
             "Fields: `name=` (required), `promoter=` (optional), "
-            "`call_target=` (optional).\n"
+            "`call_target=` (optional), `replicon=` (optional; must match a "
+            "`#config sim replicons=` entry).\n"
             "Body: an ORF beginning with `ATG` (START) and ending with a "
             "stop codon (`TAA`/`TAG`/`TGA`).",
     "promoter": "**#promoter** — a regulation site.\n\n"
@@ -70,13 +71,39 @@ ANNOTATION_DOCS: dict[str, str] = {
               "Sets `genome=true`; fields merge into `Program.sim_extensions` "
               "under a `genome_` prefix (same extension point as `#sim`).\n"
               "Fields: `source=` (`ecoli-mg1655` | `synth-4300` | path), "
-              "`tf_map=` (`regulon` | `random` | `off`), "
+              "`tf_map=` (`regulon` | `random` | `regulondb` | `off`), "
               "`grn_mode=` (`sparse` | `full`), `active_gene_budget=` "
               "(default 512), `seed=` (default 7).\n"
+              "`tf_map=regulondb` imports a real regulatory map "
+              "(`parse_regulondb`) instead of the synthetic attachment "
+              "(doc/19 §5.5 C1).\n"
               "Inert under the `classic` backend.",
     "morphogen": "**#morphogen** — morphogen→gene feedback wiring.\n\n"
                  "Fields: `gene=` (required), `channel=` (`U` | `V`, "
                  "default `V`), `gain=` (float, default 0.1).",
+    "species": "**#species** — a species in the ecosystem backend "
+               "(doc/19 §5.3 A2).\n\n"
+               "Fields (after `name=`): `genome=` (or a DNA code block, "
+               "not both), `photo=`, `photo_vmax=`, `cn_ratio=`, "
+               "`maintenance=`, `substrate=`/`vmax=`/`ks=` "
+               "(+ `substrate2`/`vmax2`/`ks2`), dotted "
+               "`consumption.<sub>.vmax/.ks`, `secretion=<sub>:<rate>`, "
+               "`diet=<prey>:<eff>`, `attack=<prey>:<rate>`.\n"
+               "Namespaced into `Program.sim_extensions` under "
+               "`species.<name>.`; consumed by `#sim kind=ecosystem`.",
+    "patch": "**#patch** — a habitat in the ecosystem backend "
+             "(doc/19 §5.3 A2, G10).\n\n"
+             "Fields (after `name=`): `kind=` (`water` | `sediment` | "
+             "`chemostat` | `soil` | `biofilm`), `width=`, `height=`, "
+             "`carrying_capacity=`, `anoxic=`, `moisture=`, `clay=`, "
+             "`cn_som=`, `cn_species=`, `initial_nh4_mm=`, `initial_no3_mm=`, "
+             "`flow_rate=`, `fluctuation_period=`, `fluctuation_amplitude=`, "
+             "plus dotted `initial.<species>=`, "
+             "`substrate.<sub>.initial/.bulk/.diffusion/.carbon_per_mol`, "
+             "`scalar.<name>.kind/.initial/.forcing/.amplitude` and "
+             "`dispersal.<neighbor>=`.\n"
+             "Namespaced into `Program.sim_extensions` under `patch.<name>.`; "
+             "consumed by `#sim kind=ecosystem`.",
     "end": "**#end** — terminates the current annotation block.",
     "dna": "**#dna** — a raw DNA body (codons outside annotations).",
 }
@@ -262,11 +289,26 @@ def _hover_field(ann: AnnotationInfo, f: Any) -> dict[str, Any]:
     elif f.key == "source":
         body += "\n\n`ecoli-mg1655` | `synth-4300` | a genome file/model path."
     elif f.key == "tf_map":
-        body += "\n\nOne of `regulon`, `random`, `off`."
+        body += "\n\nOne of `regulon`, `random`, `regulondb`, `off`."
     elif f.key == "grn_mode":
         body += "\n\nOne of `sparse`, `full`."
     elif f.key == "active_gene_budget":
         body += "\n\nPer-cell per-tick active-gene budget (default 512)."
+    elif f.key == "replicon":
+        body += "\n\nReplicon name; must match a `#config sim replicons=` entry."
+    elif f.key == "replicons":
+        body += ("\n\n`name:copy,...` (e.g. `pBR322:20`); the chromosome is "
+                 "implicit and fork-driven.")
+    elif f.key == "photo":
+        body += "\n\n`true | false` — light-gated photoautotrophy."
+    elif f.key == "anoxic":
+        body += "\n\n`true | false` — no initial oxygen."
+    elif f.key == "diet":
+        body += "\n\n`prey:<conversion efficiency>` — predation (L6)."
+    elif f.key == "attack":
+        body += "\n\n`prey:<mass-action rate>` — predation (L6)."
+    elif f.key == "secretion":
+        body += "\n\n`sub:<rate>` — cross-feeding / syntrophy (L3)."
     return Hover(contents=MarkupContent(value=body),
                  range=_line_range(f.line0)).to_dict()
 

@@ -49,10 +49,20 @@ SIM_KEYS = [
     # fba (DynamicFluxBalance)
     "fba_model", "dynfba", "fba_dt_h", "fba_glucose_mm", "fba_oxygen_max",
     "fba_steps",
+    # replicons (doc/19 §5.5 C2)
+    "replicons",
+    # ecosystem (doc/19 §5.3-§5.6; apps/ecosystem.py)
+    "fast_forward", "scheduler_max_step", "community_fba", "sample_every",
+    "generations", "evaluation_ticks", "evolution_enabled", "stress_field",
+    "stress_level",
+    # population DBTL (doc/19 §5.6 D3; apps/population_dbtl.py)
+    "n_rounds", "substrate", "vmax", "ks", "substrate_mm", "initial_nh4_mm",
+    "carrying_capacity", "target_protein", "mutation_rate", "bias_fraction",
+    "n_candidates",
 ]
 
 FIELD_SETS: dict[str, list[str]] = {
-    "gene": ["name", "promoter", "call_target"],
+    "gene": ["name", "promoter", "call_target", "replicon"],
     "promoter": ["name", "strength"],
     "regulate": [],
     "lsystem": ["name", "axiom", "rules"],
@@ -72,15 +82,25 @@ FIELD_SETS: dict[str, list[str]] = {
     "sim": ["kind"],
     "genome": ["source", "tf_map", "grn_mode", "active_gene_budget", "seed"],
     "morphogen": ["gene", "channel", "gain"],
+    "species": ["name", "genome", "photo", "photo_vmax", "cn_ratio",
+                "maintenance", "substrate", "vmax", "ks", "substrate2",
+                "vmax2", "ks2", "secretion", "diet", "attack"],
+    "patch": ["name", "kind", "width", "height", "carrying_capacity",
+              "anoxic", "moisture", "clay", "cn_som", "cn_species",
+              "initial_nh4_mm", "initial_no3_mm", "flow_rate",
+              "fluctuation_period", "fluctuation_amplitude", "dispersal"],
 }
 
 LONG_TAIL_KINDS = [
     "3d_morphology", "codec_benchmark", "codon_usage", "cello_workflow",
-    "consortium", "digital_evolution", "directed_evolution", "fate_analysis",
-    "morphogen_gradient", "omics_calibration", "population_calibration",
-    "protein_fitness", "protein_structure", "spatial_dfba",
-    "spatial_evolution", "stochastic", "synbio_design",
+    "consortium", "digital_evolution", "directed_evolution", "ecosystem",
+    "fate_analysis", "morphogen_gradient", "omics_calibration",
+    "population_calibration", "population_dbtl", "protein_fitness",
+    "protein_structure", "spatial_dfba", "spatial_evolution", "stochastic",
+    "synbio_design",
 ]
+
+PATCH_KINDS = ["water", "sediment", "chemostat", "soil", "biofilm"]
 
 FIELD_DOCS: dict[str, str] = {
     "name": "Symbol name (unique).",
@@ -110,13 +130,58 @@ FIELD_DOCS: dict[str, str] = {
     "gene": "Gene symbol bound to the reaction.",
     "reaction": "Reaction id in the model.",
     "kcat": "Enzyme turnover (s⁻¹).",
-    "kind": "Long-tail #sim backend selector.",
+    "kind": "`#sim` backend selector; `#patch` habitat kind.",
+    "replicon": "Replicon name (must match a `#config sim replicons=` entry).",
+    "replicons": "`name:copy,...` — e.g. `pBR322:20` (chromosome implicit, fork-driven).",
     "source": "Genome source: `ecoli-mg1655` | `synth-4300` | model path.",
-    "tf_map": "regulon | random | off — transcription-factor map.",
+    "tf_map": "regulon | random | regulondb | off — transcription-factor map.",
     "grn_mode": "sparse | full — GRN topology.",
     "active_gene_budget": "Per-cell per-tick active-gene budget (default 512).",
     "channel": "U | V — morphogen channel.",
     "gain": "Feedback gain (float, default 0.1).",
+    "genome": "Species genotype: a genome= source or a DNA code block.",
+    "photo": "bool: light-gated photoautotrophy.",
+    "photo_vmax": "Max CO₂ fixation rate (per biomass C per tick).",
+    "cn_ratio": "Biomass C:N ratio (CENTURY N cycle).",
+    "maintenance": "Per-tick biomass fraction respired (maintenance + mortality).",
+    "substrate": "Growth substrate (dotted `consumption.<sub>.vmax/.ks` also accepted).",
+    "vmax": "Uptake vmax (per biomass C per tick).",
+    "ks": "Uptake half-saturation Ks (mM).",
+    "substrate2": "Second growth substrate (with `vmax2`/`ks2`).",
+    "vmax2": "Uptake vmax for `substrate2`.",
+    "ks2": "Half-saturation Ks for `substrate2` (mM).",
+    "secretion": "`sub:<rate>` — cross-feeding secretion (mM per biomass C per tick).",
+    "diet": "`prey:<efficiency>` — predation conversion efficiency.",
+    "attack": "`prey:<rate>` — mass-action attack rate.",
+    "width": "Patch lattice width (well-mixed uses 1x1).",
+    "height": "Patch lattice height.",
+    "carrying_capacity": "Total biomass-C (mmol) density cap.",
+    "anoxic": "bool: no initial oxygen.",
+    "moisture": "Water-filled pore-space fraction (soil; DAMM).",
+    "clay": "Clay fraction slowing active→slow SOM transfer (CENTURY).",
+    "cn_som": "Soil organic-matter C:N ratio.",
+    "cn_species": "Species C:N ratio.",
+    "initial_nh4_mm": "Initial NH₄⁺ (mM).",
+    "initial_no3_mm": "Initial NO₃⁻ (mM).",
+    "flow_rate": "Chemostat refresh rate (0 = sealed/batch).",
+    "fluctuation_period": "Periodic substrate-supply forcing period (ticks; 0 off).",
+    "fluctuation_amplitude": "Forcing amplitude.",
+    "dispersal": "`dispersal.<neighbor>=<rate>` — per-tick migration fraction.",
+    "fast_forward": "bool: event-driven fast-forward of quiescent epochs.",
+    "scheduler_max_step": "Longest fast-forward hop (ticks).",
+    "community_fba": "bool: OptCom-style community FBA engine.",
+    "sample_every": "Observation sampling stride (ticks).",
+    "generations": "Evolution generations (1 disables the outer loop).",
+    "evaluation_ticks": "Fitness-evaluation window (ticks).",
+    "evolution_enabled": "bool: invasion-fitness evolution loop.",
+    "stress_field": "Scalar field driving selection (default `toxin`).",
+    "stress_level": "Ambient stress-field level.",
+    "n_rounds": "DBTL rounds.",
+    "substrate_mm": "Batch substrate (mM).",
+    "target_protein": "Protein sequence the DBTL loop evolves toward.",
+    "mutation_rate": "Mutation rate per site.",
+    "bias_fraction": "Unsaturated-trait biasing fraction.",
+    "n_candidates": "Candidates tested per round.",
     "backend": "classic | whole_cell | population | fba | calibration | benchmark",
     "seed": "int | none: RNG seed for determinism.",
     "division_rule": "energy | adder",
@@ -209,9 +274,14 @@ ENUM_VALUES: dict[str, list[str]] = {
     "dynfba": ["true", "false"],
     "kind": LONG_TAIL_KINDS,
     "source": ["ecoli-mg1655", "synth-4300"],
-    "tf_map": ["regulon", "random", "off"],
+    "tf_map": ["regulon", "random", "regulondb", "off"],
     "grn_mode": ["sparse", "full"],
     "channel": ["U", "V"],
+    "photo": ["true", "false"],
+    "anoxic": ["true", "false"],
+    "fast_forward": ["true", "false"],
+    "community_fba": ["true", "false"],
+    "evolution_enabled": ["true", "false"],
 }
 
 TYPE_VALUES = ["Protein", "Signal", "Float", "Int", "Bool", "String",
@@ -221,7 +291,7 @@ ANNOTATION_KINDS = ["gene", "promoter", "regulate", "lsystem", "field",
                     "config", "type", "crispr", "evolve", "methylate",
                     "histone", "transcribe", "translate", "quorum",
                     "media", "enzyme", "metabolite", "sim", "genome",
-                    "morphogen"]
+                    "morphogen", "species", "patch"]
 
 _BIO_KINDS = {"crispr", "evolve", "methylate", "histone", "transcribe",
               "translate", "quorum"}
@@ -309,7 +379,8 @@ def _items_for_context(ctx: dict[str, Any],
                      for n, s in analysis.structure.symbols.items()
                      if _role_ok(s.kind, role)]
             return _filter_prefix(items, ctx.get("prefix", ""))
-        return [_enum_item(field, v, v) for v in ENUM_VALUES.get(field, [])]
+        values = _enum_values(field, ctx.get("ann_kind", ""))
+        return [_enum_item(field, v, v) for v in values]
     if kind == "symbol":
         role = ctx.get("role", "target")
         return [_symbol_item(n, s, n)
@@ -328,6 +399,15 @@ def _role_ok(symbol_kind: str, role: str) -> bool:
     if role == "target":
         return symbol_kind == "gene"
     return True
+
+
+def _enum_values(field: str, ann_kind: str) -> list[str]:
+    """Enum values for ``field``; ``kind`` is context-dependent."""
+    if field == "kind":
+        if ann_kind == "patch":
+            return PATCH_KINDS
+        return LONG_TAIL_KINDS
+    return ENUM_VALUES.get(field, [])
 
 
 def _sort_items(items: list[CompletionItem],

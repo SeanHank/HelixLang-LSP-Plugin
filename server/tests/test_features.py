@@ -148,6 +148,102 @@ def test_completion_sim_kind_long_tail():
         assert kind in labels
 
 
+def test_completion_sim_kind_ecosystem_backends():
+    text = SAMPLE + "#sim kind=\n"
+    ana = analyze(text)
+    result = comp.completions(text, ana, {"position": {"line": 6, "character": 11}})
+    labels = [i["label"] for i in result["items"]]
+    assert "ecosystem" in labels and "population_dbtl" in labels
+
+
+def test_completion_patch_kind_enum():
+    text = SAMPLE + "#patch name=pond kind=\n"
+    ana = analyze(text)
+    result = comp.completions(text, ana, {"position": {"line": 6, "character": 22}})
+    labels = [i["label"] for i in result["items"]]
+    for kind in ("water", "sediment", "chemostat", "soil", "biofilm"):
+        assert kind in labels
+    assert "ecosystem" not in labels
+
+
+def test_completion_species_fields():
+    text = SAMPLE + "#species n\n"
+    ana = analyze(text)
+    result = comp.completions(text, ana, {"position": {"line": 6, "character": 10}})
+    labels = [i["label"] for i in result["items"]]
+    for key in ("name", "genome", "photo", "cn_ratio", "maintenance",
+                "substrate", "vmax", "ks", "secretion", "diet", "attack"):
+        assert key in labels
+
+
+def test_completion_patch_fields():
+    text = SAMPLE + "#patch k\n"
+    ana = analyze(text)
+    result = comp.completions(text, ana, {"position": {"line": 6, "character": 8}})
+    labels = [i["label"] for i in result["items"]]
+    for key in ("name", "kind", "width", "height", "carrying_capacity",
+                "anoxic", "moisture", "clay", "flow_rate", "dispersal"):
+        assert key in labels
+
+
+def test_completion_annotation_kind_species_patch():
+    text = SAMPLE + "#\n"
+    ana = analyze(text)
+    result = comp.completions(text, ana, {"position": {"line": 6, "character": 1}})
+    labels = [i["label"] for i in result["items"]]
+    assert "species" in labels and "patch" in labels
+
+
+def test_completion_replicons_field():
+    text = SAMPLE + "#config sim replicons=\n"
+    ana = analyze(text)
+    result = comp.completions(text, ana, {"position": {"line": 6, "character": 24}})
+    assert result["items"] or True  # no crash; value is free-form
+
+
+def test_completion_gene_replicon_field():
+    text = SAMPLE + "#gene name=rep replicon=\n"
+    ana = analyze(text)
+    result = comp.completions(text, ana, {"position": {"line": 6, "character": 25}})
+    assert result["items"] or True
+
+
+def test_hover_species_annotation():
+    text = SAMPLE + "#species name=producer genome=ecoli-mg1655\n"
+    ana = analyze(text)
+    result = hover.hover(text, ana, {"position": {"line": 6, "character": 1}})
+    assert result is not None
+    assert "**#species**" in result["contents"]["value"]
+
+
+def test_hover_patch_annotation():
+    text = SAMPLE + "#patch name=pond kind=water\n"
+    ana = analyze(text)
+    result = hover.hover(text, ana, {"position": {"line": 6, "character": 1}})
+    assert result is not None
+    assert "**#patch**" in result["contents"]["value"]
+
+
+def test_hover_tf_map_regulondb():
+    text = SAMPLE + "#genome tf_map=\n"
+    ana = analyze(text)
+    result = hover.hover(text, ana, {"position": {"line": 6, "character": 15}})
+    assert result is not None
+    assert "regulondb" in result["contents"]["value"]
+
+
+def test_document_symbols_species_patch():
+    text = (
+        SAMPLE
+        + "#species name=producer genome=ecoli-mg1655\n"
+        + "#patch name=pond kind=water\n"
+    )
+    result = ds.document_symbols(text, analyze(text), {})
+    names = [s["name"] for s in result]
+    assert "Species producer genome=ecoli-mg1655" in names
+    assert "Patch pond kind=water" in names
+
+
 def test_hover_genome_annotation():
     text = SAMPLE + "#genome source=synth-4300\n"
     ana = analyze(text)

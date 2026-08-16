@@ -25,6 +25,7 @@ ANNOTATION_KINDS = (
     "gene", "promoter", "regulate", "lsystem", "field", "config", "type",
     "crispr", "evolve", "methylate", "histone", "transcribe", "translate",
     "quorum", "media", "enzyme", "metabolite", "sim", "genome", "morphogen",
+    "species", "patch",
 )
 BIO_INSTRUCTION_KINDS = {
     "crispr", "evolve", "methylate", "histone",
@@ -44,6 +45,8 @@ REQUIRED_FIELDS = {
     "sim": (),
     "genome": (),
     "morphogen": ("gene",),
+    "species": ("name",),
+    "patch": ("name",),
 }
 VALID_TABLE_NAMES = tuple(helix.TABLES.keys())
 
