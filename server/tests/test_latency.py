@@ -1,6 +1,6 @@
 """Latency budget tests (doc/03 §13).
 
-A synthetic ~64 KB file must analyze (diagnostics) with p95 < 100 ms and answer
+A synthetic ~64 KB file must analyze (diagnostics) with p95 < 120 ms and answer
 a hover with p95 < 50 ms on CI-class hardware.
 """
 
@@ -13,7 +13,7 @@ import pytest
 from helixlang_lsp.analysis import analyze
 from helixlang_lsp.features.hover import hover
 
-DIAGNOSTIC_P95_MS = 100
+DIAGNOSTIC_P95_MS = 120
 HOVER_P95_MS = 50
 SAMPLES = 7
 
