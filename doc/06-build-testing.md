@@ -58,7 +58,7 @@ environment.
 ```toml
 [project]
 name = "helixlang-lsp"
-version = "2026.8.2"
+version = "2026.8.3"
 requires-python = ">=3.11"
 dependencies = ["helixlang>=1.0.0"]
 [project.scripts]

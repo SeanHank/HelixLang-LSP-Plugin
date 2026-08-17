@@ -398,7 +398,7 @@ Languages & Frameworks → HelixLang
 
 ┌─ General ────────────────────────────────────────────────┐
 │ Interpreter:  [/path/to/python ........] [Test interpreter] │
-│               · status: OK — helixlang 2026.8.2 importable │
+│               · status: OK — helixlang 2026.8.3 importable │
 │               · (leave empty for auto-detection)           │
 ├─ Language server ────────────────────────────────────────┤
 │ Transport:     [stdio ▾]   TCP port:  [8123    ]           │
