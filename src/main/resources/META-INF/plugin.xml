@@ -24,6 +24,8 @@
               implementationClass="com.helixlang.plugin.syntax.HelixSyntaxHighlighterFactory"/>
     <additionalTextAttributes scheme="Default"
               file="colorSchemes/HelixLangDefault.xml"/>
+    <additionalTextAttributes scheme="Darcula"
+              file="colorSchemes/HelixLangDarcula.xml"/>
     <colorSettingsPage id="HelixLangColors"
               implementation="com.helixlang.plugin.syntax.HelixColorSettingsPage"/>
     <lang.braceMatcher language="Helix"

@@ -6,9 +6,13 @@ import com.helixlang.plugin.lsp.transport.LspTransport
 import com.helixlang.plugin.lsp.transport.StdioTransport
 import com.helixlang.plugin.lsp.transport.TcpTransport
 import com.helixlang.plugin.settings.HelixSettings
+import com.helixlang.plugin.syntax.CodonColorKeys
 import com.intellij.openapi.Disposable
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer
+import com.intellij.openapi.fileEditor.FileDocumentManager
+import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.atomic.AtomicInteger
@@ -45,13 +49,21 @@ class HelixLspServerManager(private val project: Project) : Disposable {
         private set
 
     fun start() {
-        if (disposed || status != Status.STOPPED) return
+        if (disposed) {
+            log.warn("[Helix] start() called but manager is disposed")
+            return
+        }
+        if (status != Status.STOPPED) {
+            log.warn("[Helix] start() called but status=$status (not STOPPED)")
+            return
+        }
+        log.info("[Helix] start() proceeding; status=STOPPED → STARTING")
         status = Status.STARTING
         ApplicationManager.getApplication().executeOnPooledThread {
             try {
                 doStart()
             } catch (t: Throwable) {
-                log.warn("server start failed: ${t.message}")
+                log.warn("[Helix] server start failed: ${t.message}", t)
                 status = Status.STOPPED
                 scheduleRestart()
             }
@@ -59,9 +71,11 @@ class HelixLspServerManager(private val project: Project) : Disposable {
     }
 
     private fun doStart() {
+        log.info("[Helix] doStart() invoked; transport=${settings.transport}")
         val localTransport: LspTransport = if (settings.transport == "tcp") {
             TcpTransport(settings.tcpHost, settings.tcpPort)
         } else {
+            log.info("[Helix] doStart() resolving interpreter and building command...")
             StdioTransport(HelixServerDescriptor.serverCommand(settings))
         }
         val localDispatcher = LspDispatcher { message -> localTransport.send(message) }
@@ -101,6 +115,25 @@ class HelixLspServerManager(private val project: Project) : Disposable {
             }.getOrNull()
             localDispatcher.notify(LspConstants.INITIALIZED, null)
             status = Status.READY
+            log.info("[Helix] server READY: $serverInfo")
+            ApplicationManager.getApplication().invokeLater {
+                if (project.isDisposed) return@invokeLater
+                CodonColorKeys.registerDefaultColorsIfNeeded()
+                val fem = FileEditorManager.getInstance(project)
+                for (editor in fem.allEditors) {
+                    val vFile = editor.file ?: continue
+                    if (vFile.fileType !is com.helixlang.plugin.filetype.HelixFileType) continue
+                    val doc = FileDocumentManager.getInstance().getDocument(vFile) ?: continue
+                    log.info("[Helix] re-sending didOpen for ${vFile.name} (${doc.textLength} chars)")
+                    localDispatcher.notify(
+                        LspConstants.DID_OPEN,
+                        com.helixlang.plugin.lsp.protocol.LspMessages.didOpen(
+                            vFile.url, doc.text, 1,
+                        ),
+                    )
+                }
+                DaemonCodeAnalyzer.getInstance(project).restart()
+            }
         }
     }
 

@@ -285,12 +285,21 @@ class HelixSettingsConfigurable : SearchableConfigurable {
         testStatus.text = "Checking..."
         com.intellij.openapi.application.ApplicationManager.getApplication()
             .executeOnPooledThread {
-                com.helixlang.plugin.lsp.HelixServerDescriptor.clearCache()
-                val ok = com.helixlang.plugin.lsp.HelixServerDescriptor.canImport(python)
-                com.intellij.openapi.application.ApplicationManager.getApplication().invokeLater {
-                    testButton.isEnabled = true
-                    testStatus.text =
-                        if (ok) "OK: helixlang importable" else "FAILED: cannot import helixlang"
+                var resultText = "FAILED: unknown error"
+                try {
+                    com.helixlang.plugin.lsp.HelixServerDescriptor.clearCache()
+                    val ok = com.helixlang.plugin.lsp.HelixServerDescriptor.canImport(python)
+                    resultText = if (ok) "OK: helixlang importable" else "FAILED: cannot import helixlang"
+                } catch (t: Throwable) {
+                    com.intellij.openapi.diagnostic.Logger
+                        .getInstance(HelixSettingsConfigurable::class.java)
+                        .warn("[Helix] interpreter test failed: ${t.message}", t)
+                    resultText = "FAILED: ${t.message ?: "unknown error"}"
+                } finally {
+                    com.intellij.openapi.application.ApplicationManager.getApplication().invokeLater {
+                        testButton.isEnabled = true
+                        testStatus.text = resultText
+                    }
                 }
             }
     }

@@ -71,6 +71,7 @@ object HelixServerDescriptor {
 
     /** True if `<python> -c "import helixlang, helixlang_lsp"` succeeds. */
     fun canImport(python: File): Boolean {
+        if (!python.isFile || !python.canExecute()) return false
         val key = python.absolutePath
         importCache[key]?.let { return it }
         val ok = try {

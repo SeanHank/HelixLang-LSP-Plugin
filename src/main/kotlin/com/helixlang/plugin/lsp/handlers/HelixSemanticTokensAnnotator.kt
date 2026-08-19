@@ -12,6 +12,7 @@ import com.helixlang.plugin.syntax.HelixSyntaxHighlighter
 import com.intellij.lang.annotation.AnnotationHolder
 import com.intellij.lang.annotation.ExternalAnnotator
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.colors.EditorColorsManager
@@ -36,12 +37,15 @@ import com.intellij.psi.PsiFile
  */
 class HelixSemanticTokensAnnotator : ExternalAnnotator<String?, List<HelixSemanticRange>>(), DumbAware {
 
+    private val log = Logger.getInstance(HelixSemanticTokensAnnotator::class.java)
+
     private data class Ctx(val project: com.intellij.openapi.project.Project, val document: Document)
 
     override fun collectInformation(file: PsiFile): String? = file.virtualFile?.url
 
     override fun doAnnotate(uri: String?): List<HelixSemanticRange>? {
         if (uri == null || !HelixSettings.getInstance().semanticTokensEnabled) return null
+        CodonColorKeys.registerDefaultColorsIfNeeded()
         val ctx = ApplicationManager.getApplication().runReadAction(Computable {
             val virtualFile = VirtualFileManager.getInstance().findFileByUrl(uri) ?: return@Computable null
             val project = ProjectLocator.getInstance().guessProjectForFile(virtualFile) ?: return@Computable null
@@ -50,7 +54,13 @@ class HelixSemanticTokensAnnotator : ExternalAnnotator<String?, List<HelixSemant
         }) ?: return null
 
         val manager = ctx.project.getService(HelixLspServerManager::class.java) ?: return null
-        if (!manager.isReady) return fallbackRanges(ctx.document)
+        if (!manager.isReady) {
+            if (manager.status == HelixLspServerManager.Status.STOPPED) {
+                log.info("[Helix] server STOPPED; triggering lazy start")
+                manager.start()
+            }
+            return fallbackRanges(ctx.document)
+        }
 
         var cached: JsonObject? = manager.semanticTokensCache[uri]
         if (cached == null) {
@@ -59,21 +69,40 @@ class HelixSemanticTokensAnnotator : ExternalAnnotator<String?, List<HelixSemant
                     LspConstants.SEMANTIC_TOKENS,
                     LspMessages.requestFull(LspConstants.SEMANTIC_TOKENS, uri),
                 )
-                val response = future.get(1500, java.util.concurrent.TimeUnit.MILLISECONDS) ?: return fallbackRanges(ctx.document)
+                val response = future.get(1500, java.util.concurrent.TimeUnit.MILLISECONDS)
+                ?: run {
+                    log.warn("[Helix] semantic tokens request TIMEOUT for uri=$uri")
+                    return fallbackRanges(ctx.document)
+                }
                 val result: JsonObject = response.getAsJsonObject("result")
                 cached = result
                 manager.semanticTokensCache[uri] = result
-            } catch (_: Exception) {
+            } catch (exc: Exception) {
+                log.warn("[Helix] semantic tokens request FAILED for uri=$uri: ${exc.message}")
                 return fallbackRanges(ctx.document)
             }
         }
-        return decode(cached, ctx.document)
+        val decoded = decode(cached, ctx.document)
+        if (decoded.isEmpty()) {
+            log.warn("[Helix] server returned 0 semantic tokens for uri=$uri; using offline fallback")
+            return fallbackRanges(ctx.document)
+        }
+        log.info("[Helix] decoded ${decoded.size} semantic tokens for uri=$uri")
+        return decoded
     }
 
     override fun apply(file: PsiFile, annotationResult: List<HelixSemanticRange>?, holder: AnnotationHolder) {
-        val result = annotationResult ?: return
+        if (annotationResult == null) {
+            log.warn("[Helix] apply(): annotationResult=NULL for ${file.name}; no semantic highlights applied")
+            return
+        }
+        if (annotationResult.isEmpty()) {
+            log.info("[Helix] apply(): annotationResult is empty for ${file.name}")
+            return
+        }
         val settings = HelixSettings.getInstance()
-        for (range in result) {
+        var applied = 0
+        for (range in annotationResult) {
             val start = range.startOffset
             val end = (range.startOffset + range.length).coerceAtMost(file.textLength)
             if (start >= end) continue
@@ -81,7 +110,9 @@ class HelixSemanticTokensAnnotator : ExternalAnnotator<String?, List<HelixSemant
                 .range(TextRange(start, end))
                 .enforcedTextAttributes(effectiveAttributes(range, settings))
                 .create()
+            applied++
         }
+        log.info("[Helix] apply(): applied $applied semantic annotations for ${file.name}")
     }
 
     /**
@@ -91,12 +122,25 @@ class HelixSemanticTokensAnnotator : ExternalAnnotator<String?, List<HelixSemant
      */
     private fun effectiveAttributes(range: HelixSemanticRange, settings: HelixSettings): TextAttributes {
         val schemeAttrs = EditorColorsManager.getInstance().globalScheme.getAttributes(range.attributesKey)
-        val base = schemeAttrs ?: TextAttributes()
+        if (schemeAttrs == null) {
+            log.error("[Helix] schemeAttrs=NULL for key=${range.attributesKey} family=${range.family} " +
+                "— color scheme missing HELIX_CODON_* registration; codons will render in fallback color")
+        }
+        val base = schemeAttrs ?: TextAttributes().apply {
+            foregroundColor = java.awt.Color(0xCC7832)
+        }
         val family = range.family ?: return base
+        val overrideHex = settings.codonColorOverrides[family.id]
         val color = CodonColorKeys.effectiveOverrideColor(
             settings.codonColorCustom,
-            settings.codonColorOverrides[family.id],
-        ) ?: return base
+            overrideHex,
+        )
+        if (settings.codonColorCustom && color == null && overrideHex != null) {
+            log.error("[Helix] codon override parse FAILED for family=${family.id} " +
+                "customEnabled=${settings.codonColorCustom} hex='${overrideHex}' — invalid hex; " +
+                "falling back to scheme color")
+        }
+        if (color == null) return base
         val copy = TextAttributes()
         copy.copyFrom(base)
         copy.foregroundColor = color

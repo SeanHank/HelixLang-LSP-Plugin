@@ -1,7 +1,9 @@
 package com.helixlang.plugin.syntax
 
 import com.intellij.openapi.editor.DefaultLanguageHighlighterColors
+import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.colors.TextAttributesKey
+import com.intellij.openapi.editor.markup.TextAttributes
 
 /**
  * Codon opcode families (doc/08 §3.1). Each codon decodes to an opcode; the
@@ -68,6 +70,50 @@ object CodonColorKeys {
         familyForTokenType(tokenType)?.let(::keyForFamily)
 
     val families: List<CodonFamily> = CodonFamily.values().toList()
+
+    /**
+     * Default foreground colors for each codon family (Darcula scheme).
+     * Used as programmatic fallback when `additionalTextAttributes` XML
+     * is not loaded — e.g. during dynamic plugin hot-reload, the XML is
+     * not re-processed and `getAttributes(key)` returns only the parent
+     * key's default (KEYWORD→CC7832, CONSTANT→9876AA, etc.).
+     */
+    private val DEFAULT_COLORS: Map<TextAttributesKey, java.awt.Color> = mapOf(
+        START to java.awt.Color(0x6A8759),
+        HALT to java.awt.Color(0xFF6B68),
+        STACK to java.awt.Color(0x9876AA),
+        SYNTHESIS to java.awt.Color(0x5B8DD6),
+        BEHAVIOR to java.awt.Color(0xCC7832),
+        MORPHOLOGY to java.awt.Color(0x45A3A3),
+        REGULATION to java.awt.Color(0xC467E0),
+        CALL to java.awt.Color(0x6897BB),
+        ARITHMETIC to java.awt.Color(0xBBB529),
+    )
+
+    @Volatile
+    private var registered = false
+
+    /**
+     * Programmatically register default foreground colors into the global
+     * color scheme. Called once per plugin lifetime (cold start or hot-reload).
+     *
+     * On cold start, `additionalTextAttributes` XML already populated the
+     * scheme with these values — calling again is harmless (same colors).
+     * On hot-reload, the XML is NOT re-processed by the platform, so the
+     * `HELIX_CODON_*` keys fall back to their parent keys (KEYWORD→CC7832,
+     * CONSTANT→9876AA, etc.), producing wrong colors. This method injects
+     * the correct foreground colors into the scheme, fixing hot-reload.
+     */
+    fun registerDefaultColorsIfNeeded() {
+        if (registered) return
+        val scheme = EditorColorsManager.getInstance().globalScheme
+        for ((key, color) in DEFAULT_COLORS) {
+            val attrs = TextAttributes()
+            attrs.foregroundColor = color
+            scheme.setAttributes(key, attrs)
+        }
+        registered = true
+    }
 
     /**
      * Parse "#RRGGBB" (leading `#` optional) to a color, or `null` on garbage.
