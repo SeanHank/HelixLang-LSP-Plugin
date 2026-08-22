@@ -61,6 +61,9 @@ def semantic_tokens(text: str, analysis: Analysis,
             _classify_field(abs_tokens, line, col, value, analysis)
         elif kind == "CODON":
             _classify_codon(abs_tokens, line, col, value, analysis.table_name)
+        elif kind == "GENE_ID":
+            _add(abs_tokens, line, col, len(value), "type",
+                 TOKEN_MODIFIER_INDEX["declaration"])
         elif kind == "STRING":
             _add(abs_tokens, line, col, len(value), "string", 0)
         elif kind == "COMMENT":

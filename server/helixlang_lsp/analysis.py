@@ -25,7 +25,7 @@ ANNOTATION_KINDS = (
     "gene", "promoter", "regulate", "lsystem", "field", "config", "type",
     "crispr", "evolve", "methylate", "histone", "transcribe", "translate",
     "quorum", "media", "enzyme", "metabolite", "sim", "genome", "morphogen",
-    "species", "patch",
+    "species", "patch", "gem",
 )
 BIO_INSTRUCTION_KINDS = {
     "crispr", "evolve", "methylate", "histone",
@@ -47,6 +47,7 @@ REQUIRED_FIELDS = {
     "morphogen": ("gene",),
     "species": ("name",),
     "patch": ("name",),
+    "gem": ("organism",),
 }
 VALID_TABLE_NAMES = tuple(helix.TABLES.keys())
 
@@ -201,6 +202,11 @@ def scan_structure(tokens: list[helix.Token], text: str,
                 current.end_line0 = tok.line - 1
                 current.has_end = True
             flush_dna()
+        elif tok.kind == "GENE_ID":
+            if current is not None and current.kind == "gem":
+                current.fields.append(FieldInfo(
+                    "__gene_id", tok.value, tok.line - 1,
+                    tok.col - 1, tok.col - 1, tok.col - 1 + len(tok.value)))
         elif tok.kind == "EOF":
             break
     flush_dna()

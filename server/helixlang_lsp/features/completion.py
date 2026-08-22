@@ -54,7 +54,7 @@ SIM_KEYS = [
     # ecosystem (doc/19 §5.3-§5.6; apps/ecosystem.py)
     "fast_forward", "scheduler_max_step", "community_fba", "sample_every",
     "generations", "evaluation_ticks", "evolution_enabled", "stress_field",
-    "stress_level",
+    "stress_level", "gem_driven",
     # population DBTL (doc/19 §5.6 D3; apps/population_dbtl.py)
     "n_rounds", "substrate", "vmax", "ks", "substrate_mm", "initial_nh4_mm",
     "carrying_capacity", "target_protein", "mutation_rate", "bias_fraction",
@@ -89,6 +89,9 @@ FIELD_SETS: dict[str, list[str]] = {
               "anoxic", "moisture", "clay", "cn_som", "cn_species",
               "initial_nh4_mm", "initial_no3_mm", "flow_rate",
               "fluctuation_period", "fluctuation_amplitude", "dispersal"],
+    "gem": ["organism", "genome", "use_database", "include_spontaneous",
+            "gapfill", "target_organism", "medium", "dynamic", "duration",
+            "dt", "expression", "use_full_model"],
 }
 
 LONG_TAIL_KINDS = [
@@ -176,6 +179,7 @@ FIELD_DOCS: dict[str, str] = {
     "evolution_enabled": "bool: invasion-fitness evolution loop.",
     "stress_field": "Scalar field driving selection (default `toxin`).",
     "stress_level": "Ambient stress-field level.",
+    "gem_driven": "bool: species with `genome=` trigger GEM pipeline runs at runtime.",
     "n_rounds": "DBTL rounds.",
     "substrate_mm": "Batch substrate (mM).",
     "target_protein": "Protein sequence the DBTL loop evolves toward.",
@@ -184,6 +188,17 @@ FIELD_DOCS: dict[str, str] = {
     "n_candidates": "Candidates tested per round.",
     "backend": "classic | whole_cell | population | fba | calibration | benchmark",
     "seed": "int | none: RNG seed for determinism.",
+    "organism": "Organism identifier (required). E.g. `e_coli_k12`, `synechocystis_pcc6803`.",
+    "use_database": "bool: use online metabolic database for GEM reconstruction.",
+    "include_spontaneous": "bool: include spontaneous reactions.",
+    "gapfill": "bool: gap-fill metabolic network to enable growth.",
+    "target_organism": "Display name for the organism (for reports/logs).",
+    "medium": "Growth medium preset: `glucose_minimal` | `lb` | `bg11` | `custom`.",
+    "dynamic": "bool: run dynamic (time-resolved) GEM simulation.",
+    "duration": "Simulation duration (hours).",
+    "dt": "Time step for dynamic simulation (hours, default 0.05).",
+    "expression": "bool: include gene-expression layer in GEM.",
+    "use_full_model": "bool: import full genome-scale model (SBML/Bigg).",
     "division_rule": "energy | adder",
     "division_energy": "ATP division threshold.",
     "adder_volume_um3": "Adder volume increment (default 1.6).",
@@ -256,7 +271,10 @@ ENUM_VALUES: dict[str, list[str]] = {
     "mark": ["H3K4me3", "H3K27me3", "H3K36me3", "H3K9me3", "H3K27ac"],
     "methylase": ["dam", "dcm", "cpg"],
     "backend": ["classic", "whole_cell", "population", "fba",
-                "calibration", "benchmark"],
+                "calibration", "benchmark", "gem", "ecosystem"],
+    "medium": ["glucose_minimal", "lb", "bg11", "custom"],
+    "organism": ["e_coli_k12", "synechocystis_pcc6803",
+                 "s_cerevisiae", "b_subtilis"],
     "division_rule": ["energy", "adder"],
     "replication_mode": ["flat", "cooper_helmstetter"],
     "protein_maturation_mode": ["instant", "chaperone"],
@@ -282,6 +300,13 @@ ENUM_VALUES: dict[str, list[str]] = {
     "fast_forward": ["true", "false"],
     "community_fba": ["true", "false"],
     "evolution_enabled": ["true", "false"],
+    "gem_driven": ["true", "false"],
+    "dynamic": ["true", "false"],
+    "expression": ["true", "false"],
+    "use_full_model": ["true", "false"],
+    "use_database": ["true", "false"],
+    "include_spontaneous": ["true", "false"],
+    "gapfill": ["true", "false"],
 }
 
 TYPE_VALUES = ["Protein", "Signal", "Float", "Int", "Bool", "String",
@@ -291,7 +316,7 @@ ANNOTATION_KINDS = ["gene", "promoter", "regulate", "lsystem", "field",
                     "config", "type", "crispr", "evolve", "methylate",
                     "histone", "transcribe", "translate", "quorum",
                     "media", "enzyme", "metabolite", "sim", "genome",
-                    "morphogen", "species", "patch"]
+                    "morphogen", "species", "patch", "gem"]
 
 _BIO_KINDS = {"crispr", "evolve", "methylate", "histone", "transcribe",
               "translate", "quorum"}

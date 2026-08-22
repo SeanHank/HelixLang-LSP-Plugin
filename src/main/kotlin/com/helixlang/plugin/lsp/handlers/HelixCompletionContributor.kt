@@ -88,7 +88,7 @@ class HelixCompletionContributor : CompletionContributor(), DumbAware {
             "gene", "promoter", "regulate", "lsystem", "field", "config", "type",
             "crispr", "evolve", "methylate", "histone", "transcribe", "translate",
             "quorum", "media", "enzyme", "metabolite", "sim", "genome",
-            "morphogen", "species", "patch", "end")
+            "morphogen", "species", "patch", "gem", "end")
 
         private val FIELD_NAMES = listOf(
             "name", "promoter", "call_target", "strength", "target", "axiom",
@@ -107,7 +107,10 @@ class HelixCompletionContributor : CompletionContributor(), DumbAware {
             "sample_every", "generations", "evaluation_ticks",
             "evolution_enabled", "stress_field", "stress_level", "n_rounds",
             "substrate_mm", "target_protein", "mutation_rate", "bias_fraction",
-            "n_candidates")
+            "n_candidates", "organism", "genome", "use_database",
+            "include_spontaneous", "gapfill", "target_organism", "medium",
+            "dynamic", "duration", "dt", "expression", "use_full_model",
+            "gem_driven")
 
         private val STATIC_ITEMS: List<LookupElement> =
             ANNOTATION_KINDS.map { kind ->

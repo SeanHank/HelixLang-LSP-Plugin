@@ -1,0 +1,19 @@
+{
+  "diagnostics": [],
+  "hover": {
+    "contents": {
+      "kind": "markdown",
+      "value": "  \n**#gem** — genome-scale model (GEM) reconstruction directive.\n\nFields: `organism=` (required; e.g. `e_coli_k12`, `synechocystis_pcc6803`), `genome=` (FASTA path), `use_database=` (bool), `include_spontaneous=` (bool), `gapfill=` (bool), `target_organism=` (display name), `medium=` (`glucose_minimal` | `lb` | `bg11` | `custom`), `dynamic=` (bool), `duration=` (hours), `dt=` (hours, default 0.05), `expression=` (bool), `use_full_model=` (bool).\nMay contain an inline DNA block (codons after fields, terminated by `#end`) with `#geneId` markers.\nRepeatable — one block per organism."
+    },
+    "range": {
+      "start": {
+        "line": 28,
+        "character": 0
+      },
+      "end": {
+        "line": 28,
+        "character": 0
+      }
+    }
+  }
+}

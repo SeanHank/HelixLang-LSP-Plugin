@@ -1,0 +1,19 @@
+{
+  "diagnostics": [],
+  "hover": {
+    "contents": {
+      "kind": "markdown",
+      "value": "`ATG` **→ OP_START** (Met, M)  \noperand = 2 (wobble G)  \ntable: `standard`\n\n**Family aliases:**\n\n`ATG`"
+    },
+    "range": {
+      "start": {
+        "line": 31,
+        "character": 0
+      },
+      "end": {
+        "line": 31,
+        "character": 3
+      }
+    }
+  }
+}

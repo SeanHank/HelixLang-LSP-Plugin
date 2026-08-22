@@ -106,6 +106,17 @@ ANNOTATION_DOCS: dict[str, str] = {
              "consumed by `#sim kind=ecosystem`.",
     "end": "**#end** — terminates the current annotation block.",
     "dna": "**#dna** — a raw DNA body (codons outside annotations).",
+    "gem": "**#gem** — genome-scale model (GEM) reconstruction directive.\n\n"
+           "Fields: `organism=` (required; e.g. `e_coli_k12`, "
+           "`synechocystis_pcc6803`), `genome=` (FASTA path), "
+           "`use_database=` (bool), `include_spontaneous=` (bool), "
+           "`gapfill=` (bool), `target_organism=` (display name), "
+           "`medium=` (`glucose_minimal` | `lb` | `bg11` | `custom`), "
+           "`dynamic=` (bool), `duration=` (hours), `dt=` (hours, "
+           "default 0.05), `expression=` (bool), `use_full_model=` (bool).\n"
+           "May contain an inline DNA block (codons after fields, "
+           "terminated by `#end`) with `#geneId` markers.\n"
+           "Repeatable — one block per organism.",
 }
 
 
@@ -255,7 +266,7 @@ def _hover_field(ann: AnnotationInfo, f: Any) -> dict[str, Any]:
         body += "\n\nOne of `H3K4me3`, `H3K27me3`, `H3K36me3`, `H3K9me3`, `H3K27ac`."
     elif f.key == "backend":
         body += "\n\nOne of `classic`, `whole_cell`, `population`, `fba`, " \
-                "`calibration`, `benchmark` (default `classic`)."
+                "`calibration`, `benchmark`, `gem`, `ecosystem` (default `classic`)."
     elif f.key == "seed":
         body += "\n\n`int | none` — RNG seed (adder noise, GRN/population " \
                 "noise, calibration). Same source + same seed ⇒ identical output."
@@ -309,6 +320,18 @@ def _hover_field(ann: AnnotationInfo, f: Any) -> dict[str, Any]:
         body += "\n\n`prey:<mass-action rate>` — predation (L6)."
     elif f.key == "secretion":
         body += "\n\n`sub:<rate>` — cross-feeding / syntrophy (L3)."
+    elif f.key == "gem_driven":
+        body += "\n\n`true | false` — species with `genome=` trigger GEM pipeline runs at runtime."
+    elif f.key == "medium":
+        body += "\n\nOne of `glucose_minimal`, `lb`, `bg11`, `custom`."
+    elif f.key == "organism":
+        body += "\n\nOrganism identifier. E.g. `e_coli_k12`, `synechocystis_pcc6803`."
+    elif f.key == "duration":
+        body += "\n\nSimulation duration in hours."
+    elif f.key == "expression":
+        body += "\n\n`true | false` — include gene-expression layer in GEM."
+    elif f.key == "use_full_model":
+        body += "\n\n`true | false` — import full genome-scale model (SBML/Bigg)."
     return Hover(contents=MarkupContent(value=body),
                  range=_line_range(f.line0)).to_dict()
 

@@ -20,9 +20,10 @@ class HelixClientFoldingBuilder : FoldingBuilderEx(), DumbAware {
     override fun buildFoldRegions(root: PsiElement, document: Document, quick: Boolean): Array<FoldingDescriptor> {
         if (root !is HelixFile) return EMPTY
         val descriptors = mutableListOf<FoldingDescriptor>()
+        val lastLine = (document.lineCount - 1).coerceAtLeast(0)
         for (ann in root.annotations) {
-            val startOffset = document.getLineStartOffset(ann.startLine)
-            val endOffset = document.getLineEndOffset(ann.endLine.coerceAtMost(document.lineCount - 1))
+            val startOffset = document.getLineStartOffset(ann.startLine.coerceIn(0, lastLine))
+            val endOffset = document.getLineEndOffset(ann.endLine.coerceIn(0, lastLine))
             if (endOffset - startOffset < 2) continue
             descriptors.add(
                 FoldingDescriptor(
