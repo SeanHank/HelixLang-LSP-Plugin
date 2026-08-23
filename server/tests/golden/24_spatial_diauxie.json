@@ -1,11 +1,5 @@
 {
-  "file": "24_spatial_diauxie.helix",
-  "uri": "file:///Users/admin/PycharmProjects/HelixLang/examples/24_spatial_diauxie.helix",
   "diagnostics": [],
-  "hover_position": {
-    "line": 6,
-    "character": 1
-  },
   "hover": {
     "contents": {
       "kind": "markdown",

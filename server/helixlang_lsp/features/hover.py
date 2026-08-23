@@ -112,11 +112,21 @@ ANNOTATION_DOCS: dict[str, str] = {
            "`use_database=` (bool), `include_spontaneous=` (bool), "
            "`gapfill=` (bool), `target_organism=` (display name), "
            "`medium=` (`glucose_minimal` | `lb` | `bg11` | `custom`), "
+           "`medium_override=` (comma-separated `met:value` pairs), "
+           "`max_growth_rate=` (float cap), "
            "`dynamic=` (bool), `duration=` (hours), `dt=` (hours, "
            "default 0.05), `expression=` (bool), `use_full_model=` (bool).\n"
            "May contain an inline DNA block (codons after fields, "
            "terminated by `#end`) with `#geneId` markers.\n"
            "Repeatable — one block per organism.",
+    "reaction": "**#reaction** — DSL-authored metabolic reaction "
+                "(repeatable).\n\n"
+                "Fields: `id=` (required), `name=`, `substrate=`, `product=`, "
+                "`substrate_coeff=` (default −1), `product_coeff=` (default 1), "
+                "`lower_bound=` (default 0), `upper_bound=` (default 1000), "
+                "`subsystem=` (default `other`), `reversible=` (bool).\n"
+                "Collected into `Program.reactions` and built into a "
+                "`MetabolicModel` by `_build_model_from_reactions()`.",
 }
 
 
@@ -332,6 +342,39 @@ def _hover_field(ann: AnnotationInfo, f: Any) -> dict[str, Any]:
         body += "\n\n`true | false` — include gene-expression layer in GEM."
     elif f.key == "use_full_model":
         body += "\n\n`true | false` — import full genome-scale model (SBML/Bigg)."
+    elif f.key == "km":
+        body += "\n\nMichaelis constant (mM) for enzyme uptake kinetics (Monod model)."
+    elif f.key == "temperature":
+        body += ("\n\nTemperature in °C for the patch environment"
+                 " (affects enzyme kcat via Arrhenius).")
+    elif f.key == "ph":
+        body += ("\n\npH for the patch environment"
+                 " (affects enzyme activity via protonation).")
+    elif f.key == "medium_override":
+        body += ("\n\nComma-separated `met:value` pairs to override"
+                 " preset medium. E.g. `fe3_e:0.5,co2_e:500`.")
+    elif f.key == "max_growth_rate":
+        body += "\n\nFloat: cap maximum growth rate (overrides organism default from registry)."
+    elif f.key == "expression_level":
+        body += "\n\nFloat: per-gene expression level override (enzyme concentration calibration)."
+    elif f.key == "id":
+        body += "\n\nReaction identifier (required). E.g. `PGI`, `CS`."
+    elif f.key == "substrate":
+        body += "\n\nSubstrate metabolite id."
+    elif f.key == "product":
+        body += "\n\nProduct metabolite id."
+    elif f.key == "substrate_coeff":
+        body += "\n\nStoichiometric coefficient for substrate (default −1)."
+    elif f.key == "product_coeff":
+        body += "\n\nStoichiometric coefficient for product (default 1)."
+    elif f.key == "lower_bound":
+        body += "\n\nFlux lower bound (default 0)."
+    elif f.key == "upper_bound":
+        body += "\n\nFlux upper bound (default 1000)."
+    elif f.key == "subsystem":
+        body += "\n\nMetabolic subsystem (default `other`)."
+    elif f.key == "reversible":
+        body += "\n\n`true | false` — shorthand for setting lower_bound = −upper_bound."
     return Hover(contents=MarkupContent(value=body),
                  range=_line_range(f.line0)).to_dict()
 

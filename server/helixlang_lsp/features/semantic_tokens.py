@@ -33,6 +33,8 @@ _NUM_FIELDS = {
     "dfba_initial_biomass_gdw", "dfba_glucose_half_saturation_mm",
     "dfba_oxygen_max_uptake", "dfba_oxygen_half_saturation_mm",
     "fba_dt_h", "fba_glucose_mm", "fba_oxygen_max", "fba_steps",
+    "km", "temperature", "ph", "substrate_coeff", "product_coeff",
+    "lower_bound", "upper_bound", "expression_level", "max_growth_rate",
 }
 
 

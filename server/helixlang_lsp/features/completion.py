@@ -62,7 +62,7 @@ SIM_KEYS = [
 ]
 
 FIELD_SETS: dict[str, list[str]] = {
-    "gene": ["name", "promoter", "call_target", "replicon"],
+    "gene": ["name", "promoter", "call_target", "replicon", "expression_level"],
     "promoter": ["name", "strength"],
     "regulate": [],
     "lsystem": ["name", "axiom", "rules"],
@@ -77,7 +77,7 @@ FIELD_SETS: dict[str, list[str]] = {
     "translate": ["target"],
     "quorum": ["target"],
     "media": ["nutrient", "concentration", "diffusion_um2_s"],
-    "enzyme": ["gene", "reaction", "kcat"],
+    "enzyme": ["gene", "reaction", "kcat", "km"],
     "metabolite": ["name", "init"],
     "sim": ["kind"],
     "genome": ["source", "tf_map", "grn_mode", "active_gene_budget", "seed"],
@@ -88,10 +88,15 @@ FIELD_SETS: dict[str, list[str]] = {
     "patch": ["name", "kind", "width", "height", "carrying_capacity",
               "anoxic", "moisture", "clay", "cn_som", "cn_species",
               "initial_nh4_mm", "initial_no3_mm", "flow_rate",
-              "fluctuation_period", "fluctuation_amplitude", "dispersal"],
+              "fluctuation_period", "fluctuation_amplitude", "dispersal",
+              "temperature", "ph"],
     "gem": ["organism", "genome", "use_database", "include_spontaneous",
             "gapfill", "target_organism", "medium", "dynamic", "duration",
-            "dt", "expression", "use_full_model"],
+            "dt", "expression", "use_full_model", "medium_override",
+            "max_growth_rate"],
+    "reaction": ["id", "name", "substrate", "product", "substrate_coeff",
+                 "product_coeff", "lower_bound", "upper_bound", "subsystem",
+                 "reversible"],
 }
 
 LONG_TAIL_KINDS = [
@@ -199,6 +204,23 @@ FIELD_DOCS: dict[str, str] = {
     "dt": "Time step for dynamic simulation (hours, default 0.05).",
     "expression": "bool: include gene-expression layer in GEM.",
     "use_full_model": "bool: import full genome-scale model (SBML/Bigg).",
+    "medium_override": "Comma-separated met:value pairs to override preset"
+                       " medium. E.g. `fe3_e:0.5,co2_e:500`.",
+    "max_growth_rate": "float: cap maximum growth rate"
+                       " (overrides organism default).",
+    "expression_level": "float: per-gene expression level override"
+                        " (enzyme concentration calibration).",
+    "km": "Michaelis constant (mM) for enzyme uptake kinetics.",
+    "temperature": "Temperature in °C for the patch environment.",
+    "ph": "pH for the patch environment.",
+    "id": "Reaction identifier (required). E.g. `PGI`, `CS`.",
+    "product": "Product metabolite id.",
+    "substrate_coeff": "Stoichiometric coefficient for substrate (default −1).",
+    "product_coeff": "Stoichiometric coefficient for product (default 1).",
+    "lower_bound": "Flux lower bound (default 0).",
+    "upper_bound": "Flux upper bound (default 1000).",
+    "subsystem": "Metabolic subsystem (default `other`).",
+    "reversible": "bool: shorthand for setting lower_bound = −upper_bound.",
     "division_rule": "energy | adder",
     "division_energy": "ATP division threshold.",
     "adder_volume_um3": "Adder volume increment (default 1.6).",
@@ -307,6 +329,10 @@ ENUM_VALUES: dict[str, list[str]] = {
     "use_database": ["true", "false"],
     "include_spontaneous": ["true", "false"],
     "gapfill": ["true", "false"],
+    "reversible": ["true", "false"],
+    "subsystem": ["glycolysis", "tca", "ppp", "oxidative_phosphorylation",
+                  "amino_acid", "nucleotide", "lipid", "transport",
+                  "exchange", "biomass", "maintenance", "other"],
 }
 
 TYPE_VALUES = ["Protein", "Signal", "Float", "Int", "Bool", "String",
@@ -316,7 +342,7 @@ ANNOTATION_KINDS = ["gene", "promoter", "regulate", "lsystem", "field",
                     "config", "type", "crispr", "evolve", "methylate",
                     "histone", "transcribe", "translate", "quorum",
                     "media", "enzyme", "metabolite", "sim", "genome",
-                    "morphogen", "species", "patch", "gem"]
+                    "morphogen", "species", "patch", "gem", "reaction"]
 
 _BIO_KINDS = {"crispr", "evolve", "methylate", "histone", "transcribe",
               "translate", "quorum"}

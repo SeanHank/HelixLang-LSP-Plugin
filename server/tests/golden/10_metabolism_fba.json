@@ -1,11 +1,5 @@
 {
-  "file": "10_metabolism_fba.helix",
-  "uri": "file:///Users/admin/PycharmProjects/HelixLang/examples/10_metabolism_fba.helix",
   "diagnostics": [],
-  "hover_position": {
-    "line": 9,
-    "character": 1
-  },
   "hover": {
     "contents": {
       "kind": "markdown",
