@@ -16,7 +16,7 @@ def test_lex_error():
 
 
 def test_parse_unknown_annotation():
-    assert "parse" in _codes("#frobnicate name=x\n#end\n")
+    assert "lex" in _codes("#frobnicate name=x\n#end\n")
 
 
 def test_parse_no_start_codon():

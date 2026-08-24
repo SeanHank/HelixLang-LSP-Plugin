@@ -1,5 +1,11 @@
 {
+  "file": "36_population_calibration.helix",
+  "uri": "file:///Users/admin/PycharmProjects/HelixLang/examples/36_population_calibration.helix",
   "diagnostics": [],
+  "hover_position": {
+    "line": 18,
+    "character": 2
+  },
   "hover": {
     "contents": {
       "kind": "markdown",

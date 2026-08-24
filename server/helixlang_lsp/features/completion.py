@@ -21,7 +21,8 @@ from helixlang_lsp.protocol import (
 )
 
 CONFIG_CLASSIC_KEYS = ["ticks", "output", "table", "ops_per_tick",
-                       "react_steps", "use_central_dogma", "species", "units"]
+                       "react_steps", "use_central_dogma", "species", "units",
+                       "enzyme_mass_fraction", "dry_weight_conc"]
 
 # helix-language-wiring.md §6.2: sim-backend keys preserved verbatim in
 # Program.config.sim. Names mirror the target dataclass fields.
@@ -213,6 +214,10 @@ FIELD_DOCS: dict[str, str] = {
     "km": "Michaelis constant (mM) for enzyme uptake kinetics.",
     "temperature": "Temperature in °C for the patch environment.",
     "ph": "pH for the patch environment.",
+    "enzyme_mass_fraction": "Total enzyme protein mass fraction"
+                            " (g protein / gDW, default 0.55, Milo 2013).",
+    "dry_weight_conc": "Cell dry weight concentration"
+                       " (gDW / L, default 0.3, exponential phase).",
     "id": "Reaction identifier (required). E.g. `PGI`, `CS`.",
     "product": "Product metabolite id.",
     "substrate_coeff": "Stoichiometric coefficient for substrate (default −1).",

@@ -1,5 +1,11 @@
 {
+  "file": "54_synechocystis_full_model.helix",
+  "uri": "file:///Users/admin/PycharmProjects/HelixLang/examples/54_synechocystis_full_model.helix",
   "diagnostics": [],
+  "hover_position": {
+    "line": 35,
+    "character": 3
+  },
   "hover": {
     "contents": {
       "kind": "markdown",

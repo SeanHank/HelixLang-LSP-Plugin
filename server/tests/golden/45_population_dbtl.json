@@ -1,9 +1,15 @@
 {
+  "file": "45_population_dbtl.helix",
+  "uri": "file:///Users/admin/PycharmProjects/HelixLang/examples/45_population_dbtl.helix",
   "diagnostics": [],
+  "hover_position": {
+    "line": 17,
+    "character": 2
+  },
   "hover": {
     "contents": {
       "kind": "markdown",
-      "value": "  \n**#config** — runtime configuration.\n\nFields: `table=` (standard | mito_vertebrate | ciliate), `ticks=`, `output=` (stdout | csv | png | none), `ops_per_tick=`, `react_steps=`, `use_central_dogma=`, `species=` (ecoli | yeast | human), `units=` (gameplay | real)."
+      "value": "  \n**#config** — runtime configuration.\n\nFields: `table=` (standard | mito_vertebrate | ciliate), `ticks=`, `output=` (stdout | csv | png | none), `ops_per_tick=`, `react_steps=`, `use_central_dogma=`, `species=` (ecoli | yeast | human), `units=` (gameplay | real), `enzyme_mass_fraction=` (g protein / gDW, default 0.55), `dry_weight_conc=` (gDW / L, default 0.3)."
     },
     "range": {
       "start": {

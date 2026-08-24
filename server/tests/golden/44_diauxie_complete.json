@@ -1,5 +1,11 @@
 {
+  "file": "44_diauxie_complete.helix",
+  "uri": "file:///Users/admin/PycharmProjects/HelixLang/examples/44_diauxie_complete.helix",
   "diagnostics": [],
+  "hover_position": {
+    "line": 11,
+    "character": 2
+  },
   "hover": {
     "contents": {
       "kind": "markdown",

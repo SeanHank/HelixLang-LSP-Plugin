@@ -1,5 +1,11 @@
 {
+  "file": "32_colony_dfba.helix",
+  "uri": "file:///Users/admin/PycharmProjects/HelixLang/examples/32_colony_dfba.helix",
   "diagnostics": [],
+  "hover_position": {
+    "line": 8,
+    "character": 1
+  },
   "hover": {
     "contents": {
       "kind": "markdown",

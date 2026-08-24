@@ -1,5 +1,11 @@
 {
+  "file": "35_acetate_switch.helix",
+  "uri": "file:///Users/admin/PycharmProjects/HelixLang/examples/35_acetate_switch.helix",
   "diagnostics": [],
+  "hover_position": {
+    "line": 8,
+    "character": 2
+  },
   "hover": {
     "contents": {
       "kind": "markdown",

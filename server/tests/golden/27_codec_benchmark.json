@@ -1,5 +1,11 @@
 {
+  "file": "27_codec_benchmark.helix",
+  "uri": "file:///Users/admin/PycharmProjects/HelixLang/examples/27_codec_benchmark.helix",
   "diagnostics": [],
+  "hover_position": {
+    "line": 21,
+    "character": 1
+  },
   "hover": {
     "contents": {
       "kind": "markdown",

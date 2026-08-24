@@ -1,10 +1,10 @@
 {
-  "file": "48_ecoli_inline_dna.helix",
-  "uri": "file:///Users/admin/PycharmProjects/HelixLang/examples/48_ecoli_inline_dna.helix",
+  "file": "55_custom_organism_ecosystem.helix",
+  "uri": "file:///Users/admin/PycharmProjects/HelixLang/examples/55_custom_organism_ecosystem.helix",
   "diagnostics": [],
   "hover_position": {
-    "line": 31,
-    "character": 1
+    "line": 36,
+    "character": 3
   },
   "hover": {
     "contents": {
@@ -13,12 +13,12 @@
     },
     "range": {
       "start": {
-        "line": 31,
-        "character": 0
+        "line": 36,
+        "character": 2
       },
       "end": {
-        "line": 31,
-        "character": 3
+        "line": 36,
+        "character": 5
       }
     }
   }

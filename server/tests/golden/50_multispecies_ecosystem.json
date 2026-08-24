@@ -1,5 +1,11 @@
 {
+  "file": "50_multispecies_ecosystem.helix",
+  "uri": "file:///Users/admin/PycharmProjects/HelixLang/examples/50_multispecies_ecosystem.helix",
   "diagnostics": [],
+  "hover_position": {
+    "line": 27,
+    "character": 2
+  },
   "hover": {
     "contents": {
       "kind": "markdown",

@@ -142,6 +142,18 @@ def _decode_codon(seq: str, table: dict[str, Any], names: list[str],
     return opcode, operand, display
 
 
+def _find_codon_col(lines: list[str], line0: int, seq: str, start_col: int) -> int:
+    """Find the 0-based column of *seq* on line *line0*, starting from *start_col*.
+
+    The HelixLang lexer reports ``col=1`` for every codon on a line, so we
+    must locate each codon in the source text to get an accurate column.
+    """
+    if line0 >= len(lines):
+        return start_col
+    idx = lines[line0].find(seq, start_col)
+    return idx if idx >= 0 else start_col
+
+
 def scan_structure(tokens: list[helix.Token], text: str,
                    table_name: str = "standard") -> ScanResult:
     """Build a symbol/structure index from lexer tokens (0-based spans)."""
@@ -155,6 +167,8 @@ def scan_structure(tokens: list[helix.Token], text: str,
     dna_blocks: list[DnaBlock] = []
     current: AnnotationInfo | None = None
     open_dna: DnaBlock | None = None
+    _line_col_cursor: dict[int, int] = {}  # line0 -> next search offset
+    _lines = text.split("\n")
 
     def flush_dna() -> None:
         nonlocal open_dna
@@ -187,7 +201,11 @@ def scan_structure(tokens: list[helix.Token], text: str,
                     "__arrow_tgt", tgt, tok.line - 1, base + len(src) + 3,
                     base + len(src) + 3, base + len(src) + 3 + len(tgt)))
         elif tok.kind == "CODON":
-            ci = CodonInfo(seq=tok.value, line0=tok.line - 1, col0=tok.col - 1,
+            line0 = tok.line - 1
+            start = _line_col_cursor.get(line0, 0)
+            col0 = _find_codon_col(_lines, line0, tok.value, start)
+            _line_col_cursor[line0] = col0 + len(tok.value)
+            ci = CodonInfo(seq=tok.value, line0=line0, col0=col0,
                            table=table_name)
             if current is not None and current.kind == "gene":
                 current.body_codons.append(ci)

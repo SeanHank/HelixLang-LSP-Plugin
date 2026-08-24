@@ -1,5 +1,11 @@
 {
+  "file": "21_quorum_circuit.helix",
+  "uri": "file:///Users/admin/PycharmProjects/HelixLang/examples/21_quorum_circuit.helix",
   "diagnostics": [],
+  "hover_position": {
+    "line": 10,
+    "character": 1
+  },
   "hover": {
     "contents": {
       "kind": "markdown",

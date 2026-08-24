@@ -1,5 +1,11 @@
 {
+  "file": "53_ecoli_full_model.helix",
+  "uri": "file:///Users/admin/PycharmProjects/HelixLang/examples/53_ecoli_full_model.helix",
   "diagnostics": [],
+  "hover_position": {
+    "line": 46,
+    "character": 3
+  },
   "hover": {
     "contents": {
       "kind": "markdown",

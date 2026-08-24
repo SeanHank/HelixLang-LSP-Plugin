@@ -32,7 +32,9 @@ ANNOTATION_DOCS: dict[str, str] = {
               "Fields: `table=` (standard | mito_vertebrate | ciliate), "
               "`ticks=`, `output=` (stdout | csv | png | none), "
               "`ops_per_tick=`, `react_steps=`, `use_central_dogma=`, "
-              "`species=` (ecoli | yeast | human), `units=` (gameplay | real).",
+              "`species=` (ecoli | yeast | human), `units=` (gameplay | real), "
+              "`enzyme_mass_fraction=` (g protein / gDW, default 0.55), "
+              "`dry_weight_conc=` (gDW / L, default 0.3).",
     "type": "**#type** — a symbolic type declaration `symbol=Type`.",
     "crispr": "**#crispr** — CRISPR editing instruction. "
               "Fields: `target=`, `cas=` (SpCas9 | SaCas9 | Cas12a), "

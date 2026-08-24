@@ -1,5 +1,11 @@
 {
+  "file": "15_3d_morphology.helix",
+  "uri": "file:///Users/admin/PycharmProjects/HelixLang/examples/15_3d_morphology.helix",
   "diagnostics": [],
+  "hover_position": {
+    "line": 18,
+    "character": 1
+  },
   "hover": {
     "contents": {
       "kind": "markdown",

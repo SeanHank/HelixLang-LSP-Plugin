@@ -1,5 +1,11 @@
 {
+  "file": "12_multi_species.helix",
+  "uri": "file:///Users/admin/PycharmProjects/HelixLang/examples/12_multi_species.helix",
   "diagnostics": [],
+  "hover_position": {
+    "line": 20,
+    "character": 1
+  },
   "hover": {
     "contents": {
       "kind": "markdown",
