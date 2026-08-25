@@ -75,7 +75,7 @@ class HelixInlayHintsController(private val project: Project) : DocumentListener
         val stamp = holder.stamp
         manager.request(
             LspConstants.INLAY_HINT,
-            LspMessages.requestFull(LspConstants.INLAY_HINT, uri),
+            LspMessages.requestFull(uri),
             1500,
         ).whenComplete { response, throwable ->
             if (throwable != null || response == null) return@whenComplete

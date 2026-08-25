@@ -1,0 +1,19 @@
+{
+  "diagnostics": [],
+  "hover": {
+    "contents": {
+      "kind": "markdown",
+      "value": "  \n**#person** — virtual patient demographics (doc/27, doc/28).\n\nFields: `name=`, `age=` (years, default 30), `sex=` (male | female), `weight=` (kg, default 70), `height=` (cm, default 170), `ethnicity=` (default european).\nStored in `Program.sim_extensions` under `person_` prefix.\nConsumed by `#sim kind=human` when present."
+    },
+    "range": {
+      "start": {
+        "line": 19,
+        "character": 0
+      },
+      "end": {
+        "line": 19,
+        "character": 0
+      }
+    }
+  }
+}

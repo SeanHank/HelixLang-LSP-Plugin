@@ -52,7 +52,7 @@ class HelixHoverController(private val project: Project) : MouseMotionListener, 
         }
         manager.request(
             LspConstants.HOVER,
-            LspMessages.requestPosition(LspConstants.HOVER, file.url, line, character),
+            LspMessages.requestPosition(file.url, line, character),
         ).whenComplete { response: JsonObject?, throwable: Throwable? ->
             inFlight.set(false)
             if (throwable != null || response == null) return@whenComplete

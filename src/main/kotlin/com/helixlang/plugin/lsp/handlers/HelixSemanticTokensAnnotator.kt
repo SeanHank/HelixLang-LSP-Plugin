@@ -63,11 +63,24 @@ class HelixSemanticTokensAnnotator : ExternalAnnotator<String?, List<HelixSemant
         }
 
         var cached: JsonObject? = manager.semanticTokensCache[uri]
+        // Discard poisoned empty cache from previous sessions (double-envelope bug)
+        if (cached != null && (cached.getAsJsonArray("data")?.size() ?: 0) == 0) {
+            cached = null
+            manager.semanticTokensCache.remove(uri)
+        }
         if (cached == null) {
             try {
+                // Ensure the server has this document open before requesting tokens.
+                // didOpen is a notification (async); if we don't re-send it here,
+                // semanticTokens/full may arrive before the original didOpen is processed,
+                // causing the server to return empty tokens.
+                manager.notify(
+                    LspConstants.DID_OPEN,
+                    LspMessages.didOpen(uri, ctx.document.text, ctx.document.modificationStamp.toInt()),
+                )
                 val future = manager.request(
                     LspConstants.SEMANTIC_TOKENS,
-                    LspMessages.requestFull(LspConstants.SEMANTIC_TOKENS, uri),
+                    LspMessages.requestFull(uri),
                 )
                 val response = future.get(1500, java.util.concurrent.TimeUnit.MILLISECONDS)
                 ?: run {
@@ -76,7 +89,10 @@ class HelixSemanticTokensAnnotator : ExternalAnnotator<String?, List<HelixSemant
                 }
                 val result: JsonObject = response.getAsJsonObject("result")
                 cached = result
-                manager.semanticTokensCache[uri] = result
+                // Only cache non-empty results to avoid stale empty data
+                if ((result.getAsJsonArray("data")?.size() ?: 0) > 0) {
+                    manager.semanticTokensCache[uri] = result
+                }
             } catch (exc: Exception) {
                 log.warn("[Helix] semantic tokens request FAILED for uri=$uri: ${exc.message}")
                 return fallbackRanges(ctx.document)
@@ -204,7 +220,13 @@ class HelixSemanticTokensAnnotator : ExternalAnnotator<String?, List<HelixSemant
             "string", "comment", "operator", "arrow",
             "opcodeStart", "opcodeHalt", "opcodeStack", "opcodeSynthesis",
             "opcodeBehavior", "opcodeMorphology", "opcodeRegulation",
-            "opcodeCall", "opcodeArithmetic")
+            "opcodeCall", "opcodeArithmetic",
+            "fieldKey", "smiles")
+
+        private val HELIX_FIELD_KEY = TextAttributesKey.createTextAttributesKey(
+            "HELIX_SEMANTIC_FIELD_KEY", DefaultLanguageHighlighterColors.KEYWORD)
+        private val HELIX_SMILES = TextAttributesKey.createTextAttributesKey(
+            "HELIX_SEMANTIC_SMILES", DefaultLanguageHighlighterColors.STRING)
 
         val KEY_FOR_TYPE: Map<String, TextAttributesKey> = mapOf(
             "keyword" to TextAttributesKey.createTextAttributesKey(
@@ -224,6 +246,8 @@ class HelixSemanticTokensAnnotator : ExternalAnnotator<String?, List<HelixSemant
             "operator" to TextAttributesKey.createTextAttributesKey(
                 "HELIX_SEMANTIC_OPERATOR", DefaultLanguageHighlighterColors.OPERATION_SIGN),
             "arrow" to HelixSyntaxHighlighter.OPERATOR,
+            "fieldKey" to HELIX_FIELD_KEY,
+            "smiles" to HELIX_SMILES,
         ).plus(CodonColorKeys.families.associate { it.id to CodonColorKeys.keyForFamily(it) })
     }
 }

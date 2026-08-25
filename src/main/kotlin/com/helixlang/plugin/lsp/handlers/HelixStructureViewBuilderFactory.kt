@@ -69,7 +69,7 @@ class HelixStructureViewModel(
         return try {
             val response = manager.request(
                 LspConstants.DOCUMENT_SYMBOL,
-                LspMessages.requestFull(LspConstants.DOCUMENT_SYMBOL, uri),
+                LspMessages.requestFull(uri),
                 1000,
             ).get(1000, TimeUnit.MILLISECONDS)
             val array = response.getAsJsonObject("result").getAsJsonArray()

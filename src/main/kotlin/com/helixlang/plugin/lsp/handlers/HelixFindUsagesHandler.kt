@@ -51,7 +51,7 @@ class HelixReferencesHandler(element: PsiElement) : FindUsagesHandler(element) {
         val manager = project.getService(HelixLspServerManager::class.java)
         if (manager != null && manager.isReady) {
             try {
-                val params = LspMessages.requestPosition(LspConstants.REFERENCES, uri, line, character)
+                val params = LspMessages.requestPosition(uri, line, character)
                 val context = JsonObject()
                 context.addProperty("includeDeclaration", options.isUsages)
                 params.add("context", context)

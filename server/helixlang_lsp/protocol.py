@@ -250,7 +250,9 @@ TOKEN_TYPES = ["keyword", "type", "function", "variable", "number", "string",
                # indices stay stable across plugin versions
                "opcodeStart", "opcodeHalt", "opcodeStack", "opcodeSynthesis",
                "opcodeBehavior", "opcodeMorphology", "opcodeRegulation",
-               "opcodeCall", "opcodeArithmetic"]
+               "opcodeCall", "opcodeArithmetic",
+               # field key=value split coloring + SMILES (doc/27-33)
+               "fieldKey", "smiles"]
 TOKEN_MODIFIERS = ["declaration", "defaultLibrary"]
 
 TOKEN_TYPE_INDEX = {name: i for i, name in enumerate(TOKEN_TYPES)}

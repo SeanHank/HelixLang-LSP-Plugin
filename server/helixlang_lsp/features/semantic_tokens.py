@@ -8,12 +8,16 @@ their decoded opcode (doc/08 §3.1). Output uses LSP relative delta encoding.
 
 from __future__ import annotations
 
+import re
 from typing import Any
 
 from helixlang_lsp import _helix_contract as helix
 from helixlang_lsp.analysis import Analysis
 from helixlang_lsp.codons import decode_codon, opcode_family
 from helixlang_lsp.protocol import TOKEN_MODIFIER_INDEX, TOKEN_TYPE_INDEX, SemanticTokens
+
+_CODON_RE = re.compile(r"\b[A-Z]{3}\b")
+_ARROW_RE = re.compile(r"\S+\s*->\s*\S+")
 
 _NUM_FIELDS = {
     "strength", "size", "ticks", "ops_per_tick", "react_steps",
@@ -35,7 +39,34 @@ _NUM_FIELDS = {
     "fba_dt_h", "fba_glucose_mm", "fba_oxygen_max", "fba_steps",
     "km", "temperature", "ph", "substrate_coeff", "product_coeff",
     "lower_bound", "upper_bound", "expression_level", "max_growth_rate",
+    # human simulation numeric fields (doc/27-33)
+    "age", "weight", "height", "pack_years", "alcohol", "severity",
+    "onset_age", "activity", "normal", "mw", "binding_affinity_kd",
+    "dose", "interval", "duration", "bioavailability", "absorption_rate",
+    "vd", "cl", "half_life", "hepatic_eh", "renal_fraction", "protein_binding",
+    "ec50", "emax", "hill", "kd_nM", "kss_nM", "kd_agonist", "ki",
+    "level", "infection_severity", "autoimmune_activation", "immunosuppression",
 }
+
+
+def _build_codon_positions(text: str) -> list[tuple[int, int]]:
+    """Return a flat list of (line_0based, col_0based) for every codon in
+    source order.
+
+    The helixlang lexer has a bug where all codons in a gene block report
+    the same line and col=1.  This function re-scans the source text to
+    find the true position of each standalone 3-letter uppercase word.
+    Comment lines (starting with ``#`` after optional whitespace) are
+    excluded to avoid false positives like ``DNA`` or ``TCA`` in comments.
+    """
+    positions: list[tuple[int, int]] = []
+    for line_idx, line_text in enumerate(text.split("\n")):
+        stripped = line_text.lstrip()
+        if stripped.startswith("#"):
+            continue
+        for m in _CODON_RE.finditer(line_text):
+            positions.append((line_idx, m.start()))
+    return positions
 
 
 def semantic_tokens(text: str, analysis: Analysis,
@@ -44,6 +75,12 @@ def semantic_tokens(text: str, analysis: Analysis,
     tokens = analysis.tokens
     if not tokens:
         return SemanticTokens(data=[]).to_dict()
+
+    # Pre-scan source text to correct the lexer's codon line/col bug.
+    codon_positions = _build_codon_positions(text)
+
+    # Global occurrence index across all codons in source order.
+    codon_idx = 0
 
     abs_tokens: list[tuple[int, int, int, int, int]] = []
     for tok in tokens:
@@ -58,13 +95,26 @@ def semantic_tokens(text: str, analysis: Analysis,
         elif kind == "ANNOT_END":
             _add(abs_tokens, line, col, len(value), "keyword", 0)
         elif kind == "ARROW":
-            _add(abs_tokens, line, col, len(value), "arrow", 0)
+            # The lexer strips spaces around '->', so len(value) under-counts.
+            src_lines = text.split("\n")
+            actual_len = len(value)
+            if line < len(src_lines):
+                remaining = src_lines[line][col:]
+                m = _ARROW_RE.match(remaining)
+                if m:
+                    actual_len = m.end()
+            _add(abs_tokens, line, col, actual_len, "arrow", 0)
         elif kind == "FIELD":
             _classify_field(abs_tokens, line, col, value, analysis)
         elif kind == "CODON":
-            _classify_codon(abs_tokens, line, col, value, analysis.table_name)
+            if codon_idx < len(codon_positions):
+                corrected_line, corrected_col = codon_positions[codon_idx]
+            else:
+                corrected_line, corrected_col = line, col
+            codon_idx += 1
+            _classify_codon(abs_tokens, corrected_line, corrected_col, value, analysis.table_name)
         elif kind == "GENE_ID":
-            _add(abs_tokens, line, col, len(value), "type",
+            _add(abs_tokens, line, col, len(value) + 1, "type",
                  TOKEN_MODIFIER_INDEX["declaration"])
         elif kind == "STRING":
             _add(abs_tokens, line, col, len(value), "string", 0)
@@ -75,9 +125,24 @@ def semantic_tokens(text: str, analysis: Analysis,
     return SemanticTokens(data=encoded).to_dict()
 
 
+_SMILES_CHARS = set("CNOSPFIBcnos@+-.=#()[]0123456789%/\\")
+
+
+def _looks_smiles(val: str) -> bool:
+    """Heuristic: a SMILES string is long and contains organic-atom symbols,
+    bond operators, or ring-closure digits.  Must be at least 5 chars and
+    contain at least 3 SMILES-specific characters to avoid false positives."""
+    if len(val) < 5:
+        return False
+    hits = sum(1 for c in val if c in "cnos@+#-=()[]")
+    return hits >= 3
+
+
 def _classify_field(abs_tokens: list[tuple[int, int, int, int, int]],
                     line: int, col: int, value: str, analysis: Analysis) -> None:
     key, _, val = value.partition("=")
+    # Always emit the field key as fieldKey token type for key=value split coloring
+    _add(abs_tokens, line, col, len(key), "fieldKey", 0)
     if key == "name":
         # declaration modifier on the symbol name value
         sym = analysis.structure.symbols.get(val)
@@ -91,10 +156,12 @@ def _classify_field(abs_tokens: list[tuple[int, int, int, int, int]],
     if key in _NUM_FIELDS and _looks_numeric(val):
         _add(abs_tokens, line, col + len(key) + 1, len(val), "number", 0)
         return
+    if key == "smiles" and _looks_smiles(val):
+        _add(abs_tokens, line, col + len(key) + 1, len(val), "smiles", 0)
+        return
     if val.startswith('"') or val.startswith("'"):
         _add(abs_tokens, line, col + len(key) + 1, len(val), "string", 0)
         return
-    _add(abs_tokens, line, col, len(key), "keyword", 0)
     _add(abs_tokens, line, col + len(key) + 1, len(val), "string", 0)
 
 

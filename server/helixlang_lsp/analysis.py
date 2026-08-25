@@ -26,6 +26,8 @@ ANNOTATION_KINDS = (
     "crispr", "evolve", "methylate", "histone", "transcribe", "translate",
     "quorum", "media", "enzyme", "metabolite", "sim", "genome", "morphogen",
     "species", "patch", "gem", "reaction",
+    "person", "trait", "disease", "disease_gene", "disease_metabolite",
+    "drug", "pd_effect", "qsp_binding", "endocrine_config", "immune_config",
 )
 BIO_INSTRUCTION_KINDS = {
     "crispr", "evolve", "methylate", "histone",
@@ -49,6 +51,16 @@ REQUIRED_FIELDS = {
     "patch": ("name",),
     "gem": ("organism",),
     "reaction": ("id",),
+    "person": (),
+    "trait": (),
+    "disease": (),
+    "disease_gene": ("gene",),
+    "disease_metabolite": ("id",),
+    "drug": ("name",),
+    "pd_effect": ("drug",),
+    "qsp_binding": ("drug", "kind"),
+    "endocrine_config": ("axis",),
+    "immune_config": (),
 }
 VALID_TABLE_NAMES = tuple(helix.TABLES.keys())
 

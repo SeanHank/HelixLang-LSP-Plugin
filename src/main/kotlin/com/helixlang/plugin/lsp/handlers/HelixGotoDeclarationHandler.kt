@@ -34,7 +34,7 @@ class HelixGotoDeclarationHandler : GotoDeclarationHandler {
         if (manager != null && manager.isReady) {
             val future = manager.request(
                 LspConstants.DEFINITION,
-                LspMessages.requestPosition(LspConstants.DEFINITION, fileUri, line, character),
+                LspMessages.requestPosition(fileUri, line, character),
                 2000,
             )
             future.whenComplete { response, error ->

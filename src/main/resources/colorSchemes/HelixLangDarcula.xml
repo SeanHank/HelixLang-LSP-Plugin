@@ -46,5 +46,17 @@
                 <option name="FOREGROUND" value="BBB529"/>
             </value>
         </option>
+        <option name="HELIX_SEMANTIC_FIELD_KEY">
+            <value>
+                <option name="FOREGROUND" value="6897BB"/>
+                <option name="FONT_TYPE" value="1"/>
+            </value>
+        </option>
+        <option name="HELIX_SEMANTIC_SMILES">
+            <value>
+                <option name="FOREGROUND" value="6A8759"/>
+                <option name="FONT_TYPE" value="2"/>
+            </value>
+        </option>
     </attributes>
 </scheme>

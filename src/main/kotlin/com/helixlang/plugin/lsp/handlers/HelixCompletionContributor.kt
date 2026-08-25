@@ -35,7 +35,7 @@ class HelixCompletionContributor : CompletionContributor(), DumbAware {
             server.request(
                 LspConstants.COMPLETION,
                 com.helixlang.plugin.lsp.protocol.LspMessages.requestPosition(
-                    LspConstants.COMPLETION, fileUri, line, character),
+                    fileUri, line, character),
                 1500,
             ).whenComplete { completed, error ->
                 if (error != null || completed == null) {
@@ -88,7 +88,9 @@ class HelixCompletionContributor : CompletionContributor(), DumbAware {
             "gene", "promoter", "regulate", "lsystem", "field", "config", "type",
             "crispr", "evolve", "methylate", "histone", "transcribe", "translate",
             "quorum", "media", "enzyme", "metabolite", "sim", "genome",
-            "morphogen", "species", "patch", "gem", "reaction", "end")
+            "morphogen", "species", "patch", "gem", "reaction", "end",
+            "person", "trait", "disease", "disease_gene", "disease_metabolite",
+            "drug", "pd_effect", "qsp_binding", "endocrine_config", "immune_config")
 
         private val FIELD_NAMES = listOf(
             "name", "promoter", "call_target", "strength", "target", "axiom",
@@ -113,7 +115,18 @@ class HelixCompletionContributor : CompletionContributor(), DumbAware {
             "gem_driven", "id", "substrate", "product", "substrate_coeff",
             "product_coeff", "lower_bound", "upper_bound", "subsystem",
             "reversible", "km", "temperature", "ph", "medium_override",
-            "max_growth_rate", "expression_level")
+            "max_growth_rate", "expression_level",
+            "age", "sex", "weight", "height", "ethnicity",
+            "smoking", "pack_years", "alcohol", "exercise", "pregnant",
+            "category", "severity", "onset_age", "description",
+            "activity", "normal", "smiles", "formula", "mw", "drug_type",
+            "target_protein", "binding_affinity_kd", "dose", "route",
+            "interval", "bioavailability", "absorption_rate", "vd", "cl",
+            "half_life", "hepatic_eh", "renal_fraction", "protein_binding",
+            "cyp_metabolism", "transporter_affected", "non_cyp_metabolism",
+            "ec50", "emax", "hill", "kd_nM", "kss_nM", "kd_agonist", "ki",
+            "axis", "level", "infection_severity", "autoimmune_activation",
+            "immunosuppression")
 
         private val STATIC_ITEMS: List<LookupElement> =
             ANNOTATION_KINDS.map { kind ->

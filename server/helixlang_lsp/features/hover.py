@@ -129,6 +129,77 @@ ANNOTATION_DOCS: dict[str, str] = {
                 "`subsystem=` (default `other`), `reversible=` (bool).\n"
                 "Collected into `Program.reactions` and built into a "
                 "`MetabolicModel` by `_build_model_from_reactions()`.",
+    "person": "**#person** — virtual patient demographics "
+              "(doc/27, doc/28).\n\n"
+              "Fields: `name=`, `age=` (years, default 30), "
+              "`sex=` (male | female), `weight=` (kg, default 70), "
+              "`height=` (cm, default 170), `ethnicity=` (default european).\n"
+              "Stored in `Program.sim_extensions` under `person_` prefix.\n"
+              "Consumed by `#sim kind=human` when present.",
+    "trait": "**#trait** — patient lifestyle traits "
+             "(doc/27, doc/28).\n\n"
+             "Fields: `smoking=` (never | former | current), "
+             "`pack_years=` (float), `alcohol=` (drinks/week, float), "
+             "`exercise=` (sedentary | light | moderate | vigorous), "
+             "`pregnant=` (bool).\n"
+             "Stored under `trait_` prefix. Consumed by `#sim kind=human`.",
+    "disease": "**#disease** — disease state definition "
+               "(doc/27, doc/28).\n\n"
+               "Fields: `name=`, `category=` (e.g. metabolic_overload), "
+               "`severity=` (0.0–1.0), `onset_age=` (years), "
+               "`description=`.\n"
+               "Stored under `disease_` prefix. Consumed by `#sim kind=human`.",
+    "disease_gene": "**#disease_gene** — gene perturbation from disease "
+                    "(doc/27).\n\n"
+                    "Fields: `gene=` (required), "
+                    "`type=` (downregulate | upregulate | knockout), "
+                    "`activity=` (fraction, default 0.0).\n"
+                    "Repeatable — accumulates into `disease_genes` list.",
+    "disease_metabolite": "**#disease_metabolite** — metabolite perturbation "
+                          "from disease (doc/27).\n\n"
+                          "Fields: `id=` (required), "
+                          "`type=` (accumulate | deplete), "
+                          "`concentration=` (mM), `normal=` (mM).\n"
+                          "Repeatable — accumulates into `disease_metabolites` list.",
+    "drug": "**#drug** — drug molecule specification "
+            "(doc/27, doc/28, doc/32).\n\n"
+            "Fields: `name=` (required), `smiles=` (SMILES string), "
+            "`formula=`, `mw=` (auto-inferred from SMILES), "
+            "`drug_type=` (small_molecule | antibody | peptide), "
+            "`target_protein=`, `binding_affinity_kd=` (nM), "
+            "`dose=` (mg), `route=` (oral | iv | im | sc), "
+            "`interval=` (hours), `duration=` (days).\n"
+            "ADME fields (`bioavailability`, `absorption_rate`, `vd`, `cl`, "
+            "`half_life`, `hepatic_eh`, `renal_fraction`, `protein_binding`) "
+            "are auto-inferred from SMILES when not explicit.\n"
+            "CYP/transporter: `cyp_metabolism=`, `transporter_affected=`, "
+            "`non_cyp_metabolism=`.\n"
+            "Repeatable — accumulates into `drugs` list.",
+    "pd_effect": "**#pd_effect** — pharmacodynamic effect of a drug "
+                 "(doc/27, doc/32).\n\n"
+                 "Fields: `drug=` (required; references `#drug name=`), "
+                 "`target=` (default BIOMASSReaction), "
+                 "`type=` (inhibition | agonism), "
+                 "`ec50=` (µM), `emax=` (0.0–1.0), `hill=` (coefficient).\n"
+                 "Repeatable — accumulates into `pd_effects` list.",
+    "qsp_binding": "**#qsp_binding** — QSP target-binding model "
+                   "(doc/32).\n\n"
+                   "Fields: `drug=` (required), `kind=` (required; "
+                   "mass_action | tmdd | competitive), "
+                   "`kd_nM=`, `kss_nM=`, `emax=`, `kd_agonist=`, `ki=`.\n"
+                   "Repeatable — accumulates into `qsp_bindings` list.",
+    "endocrine_config": "**#endocrine_config** — endocrine axis config "
+                        "(doc/32).\n\n"
+                        "Fields: `axis=` (required; diabetes | addison | "
+                        "hypothyroid | stress), `severity=` (0.0–1.0), "
+                        "`level=` (hormone offset).\n"
+                        "Repeatable — accumulates into `endocrine_configs` list.",
+    "immune_config": "**#immune_config** — immune system config "
+                     "(doc/32).\n\n"
+                     "Fields: `infection_severity=` (0.0–1.0), "
+                     "`autoimmune_activation=` (0.0–1.0), "
+                     "`immunosuppression=` (0.0–1.0).\n"
+                     "Repeatable — accumulates into `immune_configs` list.",
 }
 
 
@@ -377,6 +448,102 @@ def _hover_field(ann: AnnotationInfo, f: Any) -> dict[str, Any]:
         body += "\n\nMetabolic subsystem (default `other`)."
     elif f.key == "reversible":
         body += "\n\n`true | false` — shorthand for setting lower_bound = −upper_bound."
+    elif f.key == "age":
+        body += "\n\nPatient age in years (float, default 30)."
+    elif f.key == "sex":
+        body += "\n\nOne of `male`, `female`."
+    elif f.key == "weight":
+        body += "\n\nBody weight in kg (float, default 70)."
+    elif f.key == "height":
+        body += "\n\nHeight in cm (float, default 170)."
+    elif f.key == "ethnicity":
+        body += "\n\nEthnicity (default `european`)."
+    elif f.key == "smoking":
+        body += "\n\nOne of `never`, `former`, `current`."
+    elif f.key == "pack_years":
+        body += "\n\nSmoking pack-years (float)."
+    elif f.key == "alcohol":
+        body += "\n\nAlcohol drinks per week (float)."
+    elif f.key == "exercise":
+        body += "\n\nOne of `sedentary`, `light`, `moderate`, `vigorous`."
+    elif f.key == "pregnant":
+        body += "\n\n`true | false` — pregnant status."
+    elif f.key == "category":
+        body += "\n\nDisease category (e.g. `metabolic_overload`)."
+    elif f.key == "severity":
+        body += "\n\nSeverity 0.0–1.0."
+    elif f.key == "onset_age":
+        body += "\n\nAge of disease onset (years)."
+    elif f.key == "description":
+        body += "\n\nFree-text disease description."
+    elif f.key == "activity":
+        body += "\n\nActivity fraction 0.0–1.0."
+    elif f.key == "normal":
+        body += "\n\nNormal concentration (mM)."
+    elif f.key == "smiles":
+        body += "\n\nSMILES string for the drug molecule."
+    elif f.key == "formula":
+        body += "\n\nMolecular formula (e.g. `C4H11N5`)."
+    elif f.key == "mw":
+        body += "\n\nMolecular weight (g/mol; auto-inferred from SMILES)."
+    elif f.key == "drug_type":
+        body += "\n\nOne of `small_molecule`, `antibody`, `peptide`."
+    elif f.key == "target_protein":
+        body += "\n\nProtein target of the drug."
+    elif f.key == "binding_affinity_kd":
+        body += "\n\nBinding affinity Kd (nM)."
+    elif f.key == "dose":
+        body += "\n\nDose in mg."
+    elif f.key == "route":
+        body += "\n\nOne of `oral`, `iv`, `im`, `sc`."
+    elif f.key == "interval":
+        body += "\n\nDosing interval in hours (default 24)."
+    elif f.key == "bioavailability":
+        body += "\n\nBioavailability fraction (auto-inferred from SMILES)."
+    elif f.key == "absorption_rate":
+        body += "\n\nAbsorption rate constant (auto-inferred)."
+    elif f.key == "vd":
+        body += "\n\nVolume of distribution in L (auto-inferred)."
+    elif f.key == "cl":
+        body += "\n\nClearance in mL/min (auto-inferred)."
+    elif f.key == "half_life":
+        body += "\n\nHalf-life in hours (auto-inferred)."
+    elif f.key == "hepatic_eh":
+        body += "\n\nHepatic extraction ratio (auto-inferred)."
+    elif f.key == "renal_fraction":
+        body += "\n\nRenal elimination fraction (auto-inferred)."
+    elif f.key == "protein_binding":
+        body += "\n\nProtein binding fraction (auto-inferred)."
+    elif f.key == "cyp_metabolism":
+        body += "\n\nCYP enzyme metabolism (e.g. `CYP3A4:0.5,CYP2D6:0.3`)."
+    elif f.key == "transporter_affected":
+        body += "\n\nTransporter effects (e.g. `SLCO1B1:0.6`)."
+    elif f.key == "non_cyp_metabolism":
+        body += "\n\nNon-CYP metabolism (e.g. `UGT1A1:0.7`)."
+    elif f.key == "ec50":
+        body += "\n\nEC50 for PD effect (µM)."
+    elif f.key == "emax":
+        body += "\n\nMaximum effect fraction 0.0–1.0."
+    elif f.key == "hill":
+        body += "\n\nHill coefficient for dose-response."
+    elif f.key == "kd_nM":
+        body += "\n\nDissociation constant for QSP binding (nM)."
+    elif f.key == "kss_nM":
+        body += "\n\nSteady-state Kss for QSP binding (nM)."
+    elif f.key == "kd_agonist":
+        body += "\n\nKd for agonist binding (nM)."
+    elif f.key == "ki":
+        body += "\n\nInhibition constant Ki (nM)."
+    elif f.key == "axis":
+        body += "\n\nOne of `diabetes`, `addison`, `hypothyroid`, `stress`."
+    elif f.key == "level":
+        body += "\n\nHormone level offset."
+    elif f.key == "infection_severity":
+        body += "\n\nInfection severity 0.0–1.0."
+    elif f.key == "autoimmune_activation":
+        body += "\n\nAutoimmune activation level 0.0–1.0."
+    elif f.key == "immunosuppression":
+        body += "\n\nImmunosuppression level 0.0–1.0."
     return Hover(contents=MarkupContent(value=body),
                  range=_line_range(f.line0)).to_dict()
 
