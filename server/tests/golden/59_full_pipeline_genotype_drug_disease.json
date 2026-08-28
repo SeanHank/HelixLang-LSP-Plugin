@@ -1,5 +1,11 @@
 {
+  "file": "59_full_pipeline_genotype_drug_disease.helix",
+  "uri": "file:///Users/admin/PycharmProjects/HelixLang/examples/59_full_pipeline_genotype_drug_disease.helix",
   "diagnostics": [],
+  "hover_position": {
+    "line": 21,
+    "character": 2
+  },
   "hover": {
     "contents": {
       "kind": "markdown",

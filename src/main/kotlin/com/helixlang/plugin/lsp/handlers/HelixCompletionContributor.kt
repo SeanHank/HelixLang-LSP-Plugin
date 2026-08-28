@@ -90,7 +90,8 @@ class HelixCompletionContributor : CompletionContributor(), DumbAware {
             "quorum", "media", "enzyme", "metabolite", "sim", "genome",
             "morphogen", "species", "patch", "gem", "reaction", "end",
             "person", "trait", "disease", "disease_gene", "disease_metabolite",
-            "drug", "pd_effect", "qsp_binding", "endocrine_config", "immune_config")
+            "drug", "pd_effect", "qsp_binding", "endocrine_config", "immune_config",
+            "tumor_biopsy")
 
         private val FIELD_NAMES = listOf(
             "name", "promoter", "call_target", "strength", "target", "axiom",
@@ -126,7 +127,9 @@ class HelixCompletionContributor : CompletionContributor(), DumbAware {
             "cyp_metabolism", "transporter_affected", "non_cyp_metabolism",
             "ec50", "emax", "hill", "kd_nM", "kss_nM", "kd_agonist", "ki",
             "axis", "level", "infection_severity", "autoimmune_activation",
-            "immunosuppression")
+            "immunosuppression",
+            "mutation", "amplification", "fusion", "pd_l1_expression",
+            "msi_status", "tmb_per_mb", "hr_status")
 
         private val STATIC_ITEMS: List<LookupElement> =
             ANNOTATION_KINDS.map { kind ->

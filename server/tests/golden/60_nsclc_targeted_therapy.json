@@ -1,9 +1,9 @@
 {
-  "file": "56_human_patient_simulation.helix",
-  "uri": "file:///Users/admin/PycharmProjects/HelixLang/examples/56_human_patient_simulation.helix",
+  "file": "60_nsclc_targeted_therapy.helix",
+  "uri": "file:///Users/admin/PycharmProjects/HelixLang/examples/60_nsclc_targeted_therapy.helix",
   "diagnostics": [],
   "hover_position": {
-    "line": 19,
+    "line": 21,
     "character": 2
   },
   "hover": {
@@ -13,11 +13,11 @@
     },
     "range": {
       "start": {
-        "line": 19,
+        "line": 21,
         "character": 0
       },
       "end": {
-        "line": 19,
+        "line": 21,
         "character": 0
       }
     }

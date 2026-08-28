@@ -1,5 +1,11 @@
 {
+  "file": "57_ra_methotrexate.helix",
+  "uri": "file:///Users/admin/PycharmProjects/HelixLang/examples/57_ra_methotrexate.helix",
   "diagnostics": [],
+  "hover_position": {
+    "line": 28,
+    "character": 2
+  },
   "hover": {
     "contents": {
       "kind": "markdown",

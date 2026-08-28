@@ -8,7 +8,7 @@ Grounding rule: if ``helixlang`` changes these signatures, the server is broken
 and must be updated in lockstep.
 """
 
-from helixlang.ast_nodes import (
+from helixlang.core.ast_nodes import (
     BioInstruction,
     Codon,
     Config,
@@ -19,8 +19,8 @@ from helixlang.ast_nodes import (
     Promoter,
     Regulation,
 )
-from helixlang.bytecode import Chunk
-from helixlang.codon_table import (
+from helixlang.core.bytecode import Chunk
+from helixlang.core.codon_table import (
     OP_OPERAND_BYTES,
     STANDARD_TABLE,
     TABLES,
@@ -28,9 +28,9 @@ from helixlang.codon_table import (
     get_table,
     wobble,
 )
-from helixlang.compiler import Compiler
-from helixlang.disassembler import disassemble
-from helixlang.errors import (
+from helixlang.core.compiler import Compiler
+from helixlang.core.disassembler import disassemble
+from helixlang.core.errors import (
     BioError,
     CompileError,
     HelixError,
@@ -40,11 +40,11 @@ from helixlang.errors import (
     RuntimeHelixError,
     SemanticError,
 )
-from helixlang.lexer import Lexer, Token
-from helixlang.parser import Parser
-from helixlang.semantic import SemanticAnalyzer
-from helixlang.seq_utils import stop_codons_from_table
-from helixlang.vm import CellVM
+from helixlang.core.lexer import Lexer, Token
+from helixlang.core.parser import Parser
+from helixlang.core.semantic import SemanticAnalyzer
+from helixlang.core.vm import CellVM
+from helixlang.plugins.runtime.seq_utils import stop_codons_from_table
 
 # The symbols above must satisfy this signature contract.
 # Each entry is (symbol, callable?) checked by _helix_contract tests.

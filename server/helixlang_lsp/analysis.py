@@ -28,6 +28,7 @@ ANNOTATION_KINDS = (
     "species", "patch", "gem", "reaction",
     "person", "trait", "disease", "disease_gene", "disease_metabolite",
     "drug", "pd_effect", "qsp_binding", "endocrine_config", "immune_config",
+    "tumor_biopsy",
 )
 BIO_INSTRUCTION_KINDS = {
     "crispr", "evolve", "methylate", "histone",

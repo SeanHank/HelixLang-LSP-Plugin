@@ -200,6 +200,14 @@ ANNOTATION_DOCS: dict[str, str] = {
                      "`autoimmune_activation=` (0.0–1.0), "
                      "`immunosuppression=` (0.0–1.0).\n"
                      "Repeatable — accumulates into `immune_configs` list.",
+    "tumor_biopsy": "**#tumor_biopsy** — tumor molecular profile for "
+                    "biomarker-driven cancer therapy (doc/33 §12).\n\n"
+                    "Fields: `mutation=` (comma-separated, e.g. "
+                    "`EGFR_L858R,TP53_R175H`), `amplification=`, "
+                    "`fusion=`, `pd_l1_expression=` (0.0–1.0 TPS), "
+                    "`msi_status=` (MSS | MSI-L | MSI-H), "
+                    "`tmb_per_mb=`, `hr_status=` (HRC | HRP).\n"
+                    "Stores into `sim_extensions[\"tumor_biopsy\"]`.",
 }
 
 

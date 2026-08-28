@@ -114,6 +114,9 @@ FIELD_SETS: dict[str, list[str]] = {
     "endocrine_config": ["axis", "severity", "level"],
     "immune_config": ["infection_severity", "autoimmune_activation",
                       "immunosuppression"],
+    "tumor_biopsy": ["mutation", "amplification", "fusion",
+                     "pd_l1_expression", "msi_status", "tmb_per_mb",
+                     "hr_status"],
 }
 
 LONG_TAIL_KINDS = [
@@ -405,9 +408,14 @@ ENUM_VALUES: dict[str, list[str]] = {
     "exercise": ["sedentary", "light", "moderate", "vigorous"],
     "pregnant": ["true", "false"],
     "type": ["downregulate", "upregulate", "knockout"],
-    "drug_type": ["small_molecule", "antibody", "peptide"],
+    "drug_type": ["small_molecule", "biologic", "antibody", "peptide"],
     "route": ["oral", "iv", "im", "sc"],
     "axis": ["diabetes", "addison", "hypothyroid", "stress"],
+    "msi_status": ["MSS", "MSI-L", "MSI-H"],
+    "hr_status": ["HRC", "HRP"],
+    "category": ["metabolic_overload", "cardiovascular", "neurological",
+                 "autoimmune", "infectious", "respiratory",
+                 "gastrointestinal", "endocrine", "cancer"],
 }
 
 TYPE_VALUES = ["Protein", "Signal", "Float", "Int", "Bool", "String",
@@ -420,7 +428,8 @@ ANNOTATION_KINDS = ["gene", "promoter", "regulate", "lsystem", "field",
                     "morphogen", "species", "patch", "gem", "reaction",
                     "person", "trait", "disease", "disease_gene",
                     "disease_metabolite", "drug", "pd_effect",
-                    "qsp_binding", "endocrine_config", "immune_config"]
+                    "qsp_binding", "endocrine_config", "immune_config",
+                    "tumor_biopsy"]
 
 _BIO_KINDS = {"crispr", "evolve", "methylate", "histone", "transcribe",
               "translate", "quorum"}

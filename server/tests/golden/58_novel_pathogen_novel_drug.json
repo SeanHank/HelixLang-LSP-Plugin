@@ -1,5 +1,11 @@
 {
+  "file": "58_novel_pathogen_novel_drug.helix",
+  "uri": "file:///Users/admin/PycharmProjects/HelixLang/examples/58_novel_pathogen_novel_drug.helix",
   "diagnostics": [],
+  "hover_position": {
+    "line": 33,
+    "character": 2
+  },
   "hover": {
     "contents": {
       "kind": "markdown",
