@@ -82,7 +82,7 @@ class HelixSemanticTokensAnnotator : ExternalAnnotator<String?, List<HelixSemant
                     LspConstants.SEMANTIC_TOKENS,
                     LspMessages.requestFull(uri),
                 )
-                val response = future.get(1500, java.util.concurrent.TimeUnit.MILLISECONDS)
+                val response = future.get(5000, java.util.concurrent.TimeUnit.MILLISECONDS)
                 ?: run {
                     log.warn("[Helix] semantic tokens request TIMEOUT for uri=$uri")
                     return fallbackRanges(ctx.document)
@@ -164,8 +164,11 @@ class HelixSemanticTokensAnnotator : ExternalAnnotator<String?, List<HelixSemant
     }
 
     /**
-     * Offline fallback (doc/08 §3.6): decode pure-DNA lines against the bundled
-     * standard table and map each codon to its family.
+     * Offline fallback (doc/08 §3.6): color annotation keywords, field keys,
+     * numbers/strings, and decode pure-DNA lines against the bundled standard
+     * table mapping each codon to its family. Used when the server semantic
+     * request fails or times out so field keys are not left in the default
+     * lexical (reasonably purple) color.
      */
     private fun fallbackRanges(document: Document): List<HelixSemanticRange> {
         val out = mutableListOf<HelixSemanticRange>()
@@ -173,9 +176,67 @@ class HelixSemanticTokensAnnotator : ExternalAnnotator<String?, List<HelixSemant
         val lines = text.split("\n")
         var offset = 0
         for (line in lines) {
-            for ((range, family) in HelixCodonTable.codonSpans(line)) {
-                val start = offset + range.first
-                out.add(HelixSemanticRange(start, 3, CodonColorKeys.keyForFamily(family), family))
+            val trimmed = line.trimStart()
+            if (!trimmed.startsWith("#")) {
+                // Pure DNA / codon body line.
+                for ((range, family) in HelixCodonTable.codonSpans(line)) {
+                    val start = offset + range.first
+                    out.add(HelixSemanticRange(start, 3, CodonColorKeys.keyForFamily(family), family))
+                }
+                offset += line.length + 1
+                continue
+            }
+            // Annotation / field line: emit keyword for '#kw', fieldKey for
+            // 'key' before '=', number/string for the value.
+            if (trimmed.startsWith("# ")) { // comment line
+                offset += line.length + 1
+                continue
+            }
+            var seg = offset
+            var i = 0
+            val len = line.length
+            while (i < len && line[i].isWhitespace()) i++
+            if (i < len && line[i] == '#') {
+                val kwStart = i
+                i++
+                while (i < len && (line[i] == '_' || line[i].isLetterOrDigit())) i++
+                if (i > kwStart) {
+                    out.add(HelixSemanticRange(seg + kwStart, i - kwStart,
+                        KEYWORD_KEY))
+                }
+            }
+            while (i < len) {
+                val c = line[i]
+                if (c.isWhitespace()) { i++; continue }
+                if (c == '=') { i++; continue }
+                if (c == '"') {
+                    var j = i + 1
+                    while (j < len && line[j] != '"') j++
+                    if (j < len) j++
+                    out.add(HelixSemanticRange(seg + i, j - i, STRING_KEY))
+                    i = j
+                    continue
+                }
+                if (c.isDigit()) {
+                    var j = i
+                    while (j < len && (line[j].isDigit() || line[j] == '.')) j++
+                    out.add(HelixSemanticRange(seg + i, j - i, NUMBER_KEY))
+                    i = j
+                    continue
+                }
+                if (c == '_' || c.isLetter()) {
+                    var j = i
+                    while (j < len && (line[j] == '_' || line[j].isLetterOrDigit())) j++
+                    // Field key is the identifier immediately followed by '='.
+                    var k = j
+                    while (k < len && line[k].isWhitespace()) k++
+                    if (k < len && line[k] == '=') {
+                        out.add(HelixSemanticRange(seg + i, j - i, FIELD_KEY_KEY))
+                    }
+                    i = j
+                    continue
+                }
+                i++
             }
             offset += line.length + 1
         }
@@ -227,6 +288,14 @@ class HelixSemanticTokensAnnotator : ExternalAnnotator<String?, List<HelixSemant
             "HELIX_SEMANTIC_FIELD_KEY", DefaultLanguageHighlighterColors.KEYWORD)
         private val HELIX_SMILES = TextAttributesKey.createTextAttributesKey(
             "HELIX_SEMANTIC_SMILES", DefaultLanguageHighlighterColors.STRING)
+
+        private val KEYWORD_KEY = TextAttributesKey.createTextAttributesKey(
+            "HELIX_SEMANTIC_KEYWORD", DefaultLanguageHighlighterColors.KEYWORD)
+        private val STRING_KEY = TextAttributesKey.createTextAttributesKey(
+            "HELIX_SEMANTIC_STRING", DefaultLanguageHighlighterColors.STRING)
+        private val NUMBER_KEY = TextAttributesKey.createTextAttributesKey(
+            "HELIX_SEMANTIC_NUMBER", DefaultLanguageHighlighterColors.NUMBER)
+        private val FIELD_KEY_KEY = HELIX_FIELD_KEY
 
         val KEY_FOR_TYPE: Map<String, TextAttributesKey> = mapOf(
             "keyword" to TextAttributesKey.createTextAttributesKey(
