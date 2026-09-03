@@ -38,7 +38,20 @@ _KIND_MAP: dict[str, int] = {
     "patch": SymbolKind["class"],
     "gem": SymbolKind["constant"],
     "reaction": SymbolKind["interface"],
+    "quantity": SymbolKind["constant"],
+    "use": SymbolKind["module"],
     "dna": SymbolKind["module"],
+    "person": SymbolKind["class"],
+    "trait": SymbolKind["field"],
+    "disease": SymbolKind["class"],
+    "disease_gene": SymbolKind["function"],
+    "disease_metabolite": SymbolKind["function"],
+    "drug": SymbolKind["class"],
+    "pd_effect": SymbolKind["function"],
+    "qsp_binding": SymbolKind["interface"],
+    "endocrine_config": SymbolKind["class"],
+    "immune_config": SymbolKind["class"],
+    "tumor_biopsy": SymbolKind["class"],
 }
 
 
@@ -116,6 +129,9 @@ def _symbol_name(ann: Any) -> str:
         return f"{src} -> {tgt}".strip(" -")
     if ann.kind == "config":
         return "Config"
+    if ann.kind == "use":
+        plugin = next((f.value for f in ann.fields if f.key == "plugin"), "")
+        return f"Use {plugin}" if plugin else "Use"
     return ann.kind.capitalize()
 
 

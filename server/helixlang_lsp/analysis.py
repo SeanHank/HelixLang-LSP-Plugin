@@ -25,7 +25,7 @@ ANNOTATION_KINDS = (
     "gene", "promoter", "regulate", "lsystem", "field", "config", "type",
     "crispr", "evolve", "methylate", "histone", "transcribe", "translate",
     "quorum", "media", "enzyme", "metabolite", "sim", "genome", "morphogen",
-    "species", "patch", "gem", "reaction",
+    "species", "patch", "gem", "reaction", "quantity",
     "person", "trait", "disease", "disease_gene", "disease_metabolite",
     "drug", "pd_effect", "qsp_binding", "endocrine_config", "immune_config",
     "tumor_biopsy",
@@ -52,6 +52,7 @@ REQUIRED_FIELDS = {
     "patch": ("name",),
     "gem": ("organism",),
     "reaction": ("id",),
+    "quantity": ("expr",),
     "person": (),
     "trait": (),
     "disease": (),
@@ -197,6 +198,20 @@ def scan_structure(tokens: list[helix.Token], text: str,
             current = AnnotationInfo(kind=tok.value, line0=tok.line - 1,
                                      col0=tok.col - 1)
             annotations.append(current)
+        elif tok.kind == "USERDIRECTIVE":
+            flush_dna()
+            # `#use <plugin>` — plugin opt-in (doc/41 §7). Model it as a "use"
+            # annotation holding the plugin name so hover/completion work.
+            current = AnnotationInfo(kind="use", line0=tok.line - 1,
+                                     col0=tok.col - 1)
+            annotations.append(current)
+            if tok.value:
+                base = tok.col - 1
+                val = tok.value
+                current.fields.append(FieldInfo(
+                    "plugin", val, tok.line - 1,
+                    base + len("use") + 2, base + len("use") + 2,
+                    base + len("use") + 2 + len(val)))
         elif tok.kind == "FIELD":
             key, _, val = tok.value.partition("=")
             base = tok.col - 1

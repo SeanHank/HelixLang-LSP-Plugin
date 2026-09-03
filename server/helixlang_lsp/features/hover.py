@@ -127,8 +127,17 @@ ANNOTATION_DOCS: dict[str, str] = {
                 "`substrate_coeff=` (default −1), `product_coeff=` (default 1), "
                 "`lower_bound=` (default 0), `upper_bound=` (default 1000), "
                 "`subsystem=` (default `other`), `reversible=` (bool).\n"
-                "Collected into `Program.reactions` and built into a "
-                "`MetabolicModel` by `_build_model_from_reactions()`.",
+                 "Collected into `Program.reactions` and built into a "
+                 "`MetabolicModel` by `_build_model_from_reactions()`.",
+    "quantity": "**#quantity** — physical-units composition declaration "
+                "(doc/41 §6, Ring 1).\n\n"
+                "Accepted forms: `#quantity name=TOTAL expr=A+B` or the "
+                "compact `#quantity TOTAL=A+B`.\n"
+                "`expr=` is a two-atom composition `A+B`/`A-B` where each "
+                "atom is a `#type`-annotated symbol or a bare number; "
+                "dimension checking runs in the semantic phase "
+                "(`DimInferencer`).\n"
+                "Stored verbatim under `sim_extensions[\"quantity\"]`.",
     "person": "**#person** — virtual patient demographics "
               "(doc/27, doc/28).\n\n"
               "Fields: `name=`, `age=` (years, default 30), "
@@ -165,7 +174,7 @@ ANNOTATION_DOCS: dict[str, str] = {
             "(doc/27, doc/28, doc/32).\n\n"
             "Fields: `name=` (required), `smiles=` (SMILES string), "
             "`formula=`, `mw=` (auto-inferred from SMILES), "
-            "`drug_type=` (small_molecule | antibody | peptide), "
+             "`drug_type=` (small_molecule | biologic | antibody | peptide), "
             "`target_protein=`, `binding_affinity_kd=` (nM), "
             "`dose=` (mg), `route=` (oral | iv | im | sc), "
             "`interval=` (hours), `duration=` (days).\n"
@@ -207,7 +216,33 @@ ANNOTATION_DOCS: dict[str, str] = {
                     "`fusion=`, `pd_l1_expression=` (0.0–1.0 TPS), "
                     "`msi_status=` (MSS | MSI-L | MSI-H), "
                     "`tmb_per_mb=`, `hr_status=` (HRC | HRP).\n"
-                    "Stores into `sim_extensions[\"tumor_biopsy\"]`.",
+                     "Stores into `sim_extensions[\"tumor_biopsy\"]`.",
+    "use": "**#use** — opt into a bundled plugin (doc/41 §7).\n\n"
+           "Usage: `#use <plugin> [--flag ...]`.\n"
+           "Bundled plugins: `grn`, `fba`, `human`, `apps`, `annotation`, "
+           "`gem`, `kinetics`, `omics`, `cardiology`, `ode_model`.\n"
+           "Capability flags: `--pure-python`, `--approx-euler`, "
+           "`--low-fidelity` (mutually incompatible with `native`).\n"
+           "Plugin-registered annotation keywords (e.g. `#cardiac_cycle`, "
+           "`#model`, `#ode_species`, `#ode_reaction`) are only active after "
+           "the corresponding `#use`.",
+    "cardiac_cycle": "**#cardiac_cycle** — cardiac-cycle force/timing params "
+                     "(cardiology plugin; needs `#use cardiology`).\n\n"
+                     "Fields: `period=` (float, required), "
+                     "`conduction=` (string, default `normal`).",
+    "model": "**#model** — mechanistic ODE model (ode_model plugin; needs "
+             "`#use ode_model`).\n\n"
+             "Fields: `name=` (string, required), `k1=` (float, required), "
+             "`k2=` (float, required), `t_end=` (float, default 10), "
+             "`steps=` (int, default 100).",
+    "ode_species": "**#ode_species** — an ODE species (ode_model plugin; "
+                   "needs `#use ode_model`).\n\n"
+                   "Fields: `name=` (string, required), "
+                   "`initial=` (float, required), `units=` (string).",
+    "ode_reaction": "**#ode_reaction** — an ODE reaction (ode_model plugin; "
+                    "needs `#use ode_model`).\n\n"
+                    "Fields: `species=` (string, required), "
+                    "`expr=` (string, required).",
 }
 
 

@@ -88,13 +88,14 @@ class HelixCompletionContributor : CompletionContributor(), DumbAware {
             "gene", "promoter", "regulate", "lsystem", "field", "config", "type",
             "crispr", "evolve", "methylate", "histone", "transcribe", "translate",
             "quorum", "media", "enzyme", "metabolite", "sim", "genome",
-            "morphogen", "species", "patch", "gem", "reaction", "end",
+            "morphogen", "species", "patch", "gem", "reaction",
+            "quantity", "use", "end",
             "person", "trait", "disease", "disease_gene", "disease_metabolite",
             "drug", "pd_effect", "qsp_binding", "endocrine_config", "immune_config",
             "tumor_biopsy")
 
         private val FIELD_NAMES = listOf(
-            "name", "promoter", "call_target", "strength", "target", "axiom",
+            "name", "expr", "promoter", "call_target", "strength", "target", "axiom",
             "rules", "ticks", "output", "table", "species", "units",
             "nutrient", "concentration", "diffusion_um2_s", "gene", "reaction",
             "kcat", "init", "backend", "seed", "division_rule",

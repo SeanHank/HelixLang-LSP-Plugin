@@ -5,6 +5,6 @@ HelixLang compiler (``src/helixlang``) and compiler results into LSP messages.
 It adds no language semantics of its own.
 """
 
-__version__ = "2026.8.5"
+__version__ = "2026.9.0"
 
 __all__ = ["__version__"]

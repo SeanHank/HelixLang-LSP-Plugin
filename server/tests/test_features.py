@@ -194,6 +194,39 @@ def test_completion_annotation_kind_species_patch():
     assert "species" in labels and "patch" in labels
 
 
+def test_completion_annotation_kind_quantity_use():
+    text = SAMPLE + "#\n"
+    ana = analyze(text)
+    result = comp.completions(text, ana, {"position": {"line": 6, "character": 1}})
+    labels = [i["label"] for i in result["items"]]
+    assert "quantity" in labels and "use" in labels
+
+
+def test_completion_quantity_fields():
+    text = SAMPLE + "#quantity name=TOTAL expr=A+B\n#quantity e\n"
+    ana = analyze(text)
+    result = comp.completions(text, ana, {"position": {"line": 7, "character": 11}})
+    labels = [i["label"] for i in result["items"]]
+    assert "expr" in labels
+
+
+def test_hover_quantity():
+    text = (SAMPLE +
+            "#quantity name=TOTAL expr=g+v\n")
+    ana = analyze(text)
+    result = hover.hover(text, ana, {"position": {"line": 6, "character": 4}})
+    assert result is not None
+    assert "**#quantity**" in result["contents"]["value"]
+
+
+def test_hover_use():
+    text = SAMPLE + "#use cardiology\n"
+    ana = analyze(text)
+    result = hover.hover(text, ana, {"position": {"line": 6, "character": 2}})
+    assert result is not None
+    assert "**#use**" in result["contents"]["value"]
+
+
 def test_completion_replicons_field():
     text = SAMPLE + "#config sim replicons=\n"
     ana = analyze(text)
