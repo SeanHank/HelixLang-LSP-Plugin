@@ -10,8 +10,10 @@ from __future__ import annotations
 
 import io
 import json
+import os
 import runpy
 import socket
+import subprocess
 import sys
 import threading
 import time
@@ -127,3 +129,25 @@ def test_run_module_entry_smoke(monkeypatch, tmp_path):
     assert ei.value.code == 1  # EOF without shutdown
     assert b"Content-Length:" in outbox.getvalue()
     assert trace.read_text(encoding="utf-8").splitlines()
+
+
+def test_main_module_guard_subprocess(tmp_path):
+    """Run ``main.py`` as ``__main__`` so the ``sys.exit(main())`` guard runs.
+
+    Executing a module via ``python -m`` sets ``__name__ == "__main__"``,
+    which is the only way to reach the module-level ``if __name__`` guard. A
+    coverage ``.pth`` hook (a1_coverage.pth) records the subprocess into the
+    same data file that pytest-cov combines, keeping the guard part of the
+    measured package (no exclusion).
+    """
+    cfg = tmp_path / "cov.coveragerc"
+    cfg.write_text("[run]\nsource = helixlang_lsp\n")
+    env = dict(os.environ)
+    env["COVERAGE_PROCESS_START"] = str(cfg)
+    env["PYTHONPATH"] = os.pathsep.join(
+        [p for p in env.get("PYTHONPATH", "").split(os.pathsep) if p])
+    proc = subprocess.run(
+        [sys.executable, "-m", "helixlang_lsp.main", "--help"],
+        capture_output=True, text=True, env=env)
+    assert proc.returncode == 0
+    assert "usage" in (proc.stdout + proc.stderr).lower()

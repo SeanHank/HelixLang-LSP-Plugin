@@ -43,7 +43,7 @@ jobs:
         run: python -m mypy helixlang_lsp
 
       - name: Test (pytest + coverage)
-        run: python -m pytest tests --cov=helixlang_lsp --cov-fail-under=85
+        run: python -m pytest tests --cov=helixlang_lsp --cov-fail-under=100
 
       - name: Latency budgets (un-instrumented)
         run: python -m pytest tests/test_latency.py
