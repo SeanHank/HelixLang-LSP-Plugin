@@ -97,7 +97,7 @@ For a live dev sandbox: `./gradlew runIde`. The Python language server is under
 ### Test the language server
 
 ```sh
-python -m pytest server/tests --cov=helixlang_lsp --cov-fail-under=85
+python -m pytest server/tests --cov=helixlang_lsp --cov-fail-under=100
 python -m pytest server/tests/test_latency.py   # latency budgets, un-instrumented
 python -m ruff check server
 python -m mypy server
@@ -134,7 +134,7 @@ push/PR, then **publishes a GitHub Release on every push to `main`**:
 
 | Job | What it does |
 |---|---|
-| **Server** | Python 3.11 — `ruff` + `mypy` + `pytest` with ≥85% coverage |
+| **Server** | Python 3.11 — `ruff` + `mypy` + `pytest` with 100% coverage |
 | **Plugin** | JDK 17 — `./gradlew build` (tests + `buildPlugin` + `verifyPlugin`) |
 | **Release** | Uploads the plugin zip to a GitHub Release tagged `v<version>` (only on `main`) |
 
@@ -165,7 +165,7 @@ The full engineering design lives in [`doc/`](./doc/README.md):
 ## 🤝 Contributing
 
 Contributions are welcome! Please read **[CONTRIBUTING.md](CONTRIBUTING.md)** first — it covers
-the development setup, the quality gates (`ruff` + `mypy` + pytest ≥85% coverage for the
+the development setup, the quality gates (`ruff` + `mypy` + pytest 100% coverage for the
 server; `./gradlew build` with JDK 17 for the plugin), the golden-test workflow, coding
 conventions, and the documentation policy.
 

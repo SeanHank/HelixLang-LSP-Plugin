@@ -65,7 +65,7 @@ python -m pip install -e "server[dev]"
 cd server
 python -m ruff check .
 python -m mypy helixlang_lsp
-python -m pytest tests --cov=helixlang_lsp --cov-fail-under=85
+python -m pytest tests --cov=helixlang_lsp --cov-fail-under=100
 ```
 
 See the project's [CONTRIBUTING.md](https://github.com/SeanHank/HelixLang-LSP-Plugin/blob/main/CONTRIBUTING.md) for details.

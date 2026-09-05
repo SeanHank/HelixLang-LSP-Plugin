@@ -163,10 +163,10 @@ From `server/`:
 ```bash
 python -m ruff check .
 python -m mypy helixlang_lsp
-python -m pytest tests --cov=helixlang_lsp --cov-fail-under=85
+python -m pytest tests --cov=helixlang_lsp --cov-fail-under=100
 ```
 
-- Coverage gate is **85%** (see `server/pyproject.toml`).
+- Coverage gate is **100%** (see `server/pyproject.toml`).
 - Run a single file: `python -m pytest tests/test_hover.py`
 - **Latency budgets** run un-instrumented, because they skip themselves under
   pytest-cov:
@@ -217,7 +217,7 @@ review the diff — golden drift must be intentional.
 
 | Job | Runs |
 |-----|------|
-| `server` | Python 3.11: `ruff` + `mypy` + `pytest --cov-fail-under=85` + latency budgets |
+| `server` | Python 3.11: `ruff` + `mypy` + `pytest --cov-fail-under=100` + latency budgets |
 | `plugin` | JDK 17: `./gradlew build` + uploads the plugin zip artifact |
 | `release` | (push to `main` only) publishes a GitHub Release — see below |
 

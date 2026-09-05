@@ -91,7 +91,7 @@ backends; a sim-backend example runs from the IDE with CLI-identical output.
 | Features | Every P0 feature in `doc/05` passes its acceptance test. |
 | Resilience | Server killed ⇒ auto-restart ≤ 5 attempts/10 min; no EDT freeze. |
 | Performance | Budgets in `doc/06` §7 hold on CI hardware. |
-| Quality gates | pytest+coverage≥85%, ruff, mypy, `verifyPlugin`, `buildPlugin`, platform tests green. |
+| Quality gates | pytest+coverage=100%, ruff, mypy, `verifyPlugin`, `buildPlugin`, platform tests green. |
 | Docs | `doc/*` in sync with the implementation at release (doc-vs-code, code wins). |
 
 ## 3. Risk register

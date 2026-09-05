@@ -75,7 +75,7 @@ Also declared as the `lsp` extra of the HelixLang distribution so a single
 | Gate | Command | Policy |
 |------|---------|--------|
 | Unit + conformance tests | `/opt/anaconda3/envs/helix/bin/python -m pytest server/tests` | 100% pass |
-| Coverage | `--cov=helixlang_lsp --cov-fail-under=85` | ≥ 85% |
+| Coverage | `--cov=helixlang_lsp --cov-fail-under=100` | 100% |
 | Latency budgets | `pytest server/tests/test_latency.py` (un-instrumented) | §7 budgets hold |
 | Lint | `/opt/anaconda3/envs/helix/bin/python -m ruff check server` | clean |
 | Types | `/opt/anaconda3/envs/helix/bin/python -m mypy server` | clean |
@@ -159,7 +159,7 @@ jobs:
       - pip install -e ".[dev]"
       - ruff check .            # lint
       - mypy helixlang_lsp      # types
-      - pytest tests --cov=helixlang_lsp --cov-fail-under=85   # gates + coverage
+      - pytest tests --cov=helixlang_lsp --cov-fail-under=100   # gates + coverage
       - pytest tests/test_latency.py                           # budgets (no cov)
   plugin:                       # JDK 17, repo root
     steps:
