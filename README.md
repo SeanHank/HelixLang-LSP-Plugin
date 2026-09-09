@@ -2,9 +2,9 @@
 
 # 🧬 HelixLang IDE
 
-_"The precise sequence of the bases is the code which carries the genetical information." — James Watson & Francis Crick_
-
 **Language Server Protocol integration for the HelixLang DSL — a PyCharm client plus a Python language server.**
+
+_"The precise sequence of the bases is the code which carries the genetical information." — James Watson & Francis Crick_
 
 Write `.helix` programs with real IDE superpowers: diagnostics, hover docs, completion,
 navigation, semantic highlighting, inlay hints, a bytecode disassembler, and a line debugger.
